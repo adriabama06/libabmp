@@ -1,3 +1,8 @@
+# Custom
+build
+
+# By default
+
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
