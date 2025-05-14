@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.vpy": "python",
+        "abitmap.h": "c",
+        "stdio.h": "c",
+        "abmp.h": "c",
+        "array": "c",
+        "string": "c",
+        "string_view": "c"
+    }
+}

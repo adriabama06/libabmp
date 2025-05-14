@@ -4,6 +4,7 @@ project(libabmp VERSION 1.0.0 LANGUAGES C)
 # Library target
 add_library(abmp STATIC
     src/abmp.c
+    src/read.c
 )
 
 target_include_directories(abmp PUBLIC
