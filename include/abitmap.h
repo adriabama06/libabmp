@@ -8,7 +8,12 @@ extern "C" {
 #endif
 
 // http://www.ece.ualberta.ca/~elliott/ee552/studentAppNotes/2003_w/misc/bmp_file_format/bmp_file_format.htm
-typedef struct __attribute__((__packed__))ABMP_BITMAP_HEADER_S
+typedef struct
+#if ABMP_ABITMAP_NOT_USE_PACKED_HEADER == 1 // Let the user select if want to use or not padding in header
+ABMP_BITMAP_HEADER_S
+#else
+__attribute__((__packed__))ABMP_BITMAP_HEADER_S
+#endif
 {
     uint8_t signature[2];
     uint32_t filesize;
@@ -28,6 +33,7 @@ typedef struct __attribute__((__packed__))ABMP_BITMAP_HEADER_S
     uint32_t important_colors;
 } ABMP_BITMAP_HEADER;
 
+// Append the dynamic sized structs
 typedef struct ABMP_BITMAP_S
 {
     ABMP_BITMAP_HEADER header;
