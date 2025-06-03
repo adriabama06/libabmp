@@ -38,7 +38,11 @@ ABMP_BITMAP_HEADER abmp_read_header(uint8_t* data)
 {
     ABMP_BITMAP_HEADER header;
 
-    if(sizeof(ABMP_BITMAP_HEADER) != 54) // This means __attribute__((__packed__)) is not working, leaving to a manual read
+    if(sizeof(ABMP_BITMAP_HEADER) == 54) 
+    {
+        memcpy(&header, data, sizeof(ABMP_BITMAP_HEADER));
+    }
+    else // This means __attribute__((__packed__)) is not working, leaving to a manual read
     {
         size_t count = 0;
         
@@ -57,10 +61,6 @@ ABMP_BITMAP_HEADER abmp_read_header(uint8_t* data)
         memcpy(&header.x_pixels_per_m,   data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
         memcpy(&header.colors_used,      data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
         memcpy(&header.important_colors, data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-    }
-    else
-    {
-        memcpy(&header, data, sizeof(ABMP_BITMAP_HEADER));
     }
 
     return header;
