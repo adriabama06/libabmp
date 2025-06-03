@@ -4,22 +4,59 @@
 #include <memory.h>
 #include <stdlib.h>
 
+const char __BMP_MEMORY_SIZES[] = {
+    sizeof(uint8_t)  * 2,
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint16_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t)
+};
+
+size_t __BMP_MEMORY_OFFSETS(size_t count)
+{
+    size_t offset = 0;
+
+    for (size_t i = 1; i < count; i++)
+    {
+        offset += __BMP_MEMORY_SIZES[i - 1];
+    }
+
+    return offset;
+}
+
 ABMP_BITMAP_HEADER abmp_read_header(uint8_t* data)
 {
     ABMP_BITMAP_HEADER header;
 
-    if(sizeof(ABMP_BITMAP_HEADER) != 54) // This means __attribute__((__packed__)) is not working, leaving to a "manual" but tricky read
+    if(sizeof(ABMP_BITMAP_HEADER) != 54) // This means __attribute__((__packed__)) is not working, leaving to a manual read
     {
-        if(sizeof(ABMP_BITMAP_HEADER) != 56) // This can be fixed doing a real manual map to memory, this tricky implementation is only for 56 bytes case
-        {
-            printf("Unexpected sizeof(ABMP_BITMAP_HEADER) = %d; Exiting...\n", sizeof(ABMP_BITMAP_HEADER));
-            exit(1);
-        }
-
-        // The __attribute__((__packed__)) only affects on the signature, adding 2 more of uint8_t
-        memcpy(&header.signature, data, sizeof(uint8_t)*2);
-
-        memcpy(&header.filesize, data + sizeof(uint8_t)*2, 52);
+        size_t count = 0;
+        
+        memcpy(&header.signature,        data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header.filesize,         data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header.reserved,         data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header.dataoffset,       data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header.size,             data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header.width,            data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header.height,           data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header.planes,           data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header.bits_per_pixel,   data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header.compression,      data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header.imagesize,        data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header.y_pixels_per_m,   data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header.x_pixels_per_m,   data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header.colors_used,      data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header.important_colors, data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
     }
     else
     {
