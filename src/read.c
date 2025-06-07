@@ -70,7 +70,7 @@ size_t abmp_read_header(uint8_t* data, ABMP_BITMAP_HEADER* header)
         return 1;
     }
 
-    if(header->width * header->height * 3 + (header->width % 4) * header->height != header->imagesize)
+    if(header->width * header->height * 3 + (header->width % 4) * header->height != header->imagesize && header->imagesize != 0) // It is valid to set imagesize = 0 if compression = 0
     {
         // A: This is not a BMP file, B: The file is wrong.
         return 2;
@@ -79,23 +79,29 @@ size_t abmp_read_header(uint8_t* data, ABMP_BITMAP_HEADER* header)
     return 0;
 }
 
-ABMP_BITMAP abmp_read_data(uint8_t* data, ABMP_BITMAP_HEADER header)
+size_t abmp_read_data(uint8_t* data, ABMP_BITMAP* bitmap)
 {
-    ABMP_BITMAP bitmap;
-
-    bitmap.header = header;
-
-    if(bitmap.header.bits_per_pixel <= 8) {
-        // Do something with ColorTable
-    }
-
-    if(bitmap.header.compression != 0) {
+    if(bitmap->header.compression != 0)
+    {
         // Has compression
+        return 1;
     }
 
-    bitmap.pixel_data = (char*) malloc(bitmap.header.imagesize);
+    if(bitmap->header.bits_per_pixel <= 8)
+    {
+        // Do something with ColorTable
+        return 2;
+    }
 
-    memcpy(bitmap.pixel_data, data + bitmap.header.dataoffset, bitmap.header.imagesize);
+    bitmap->pixel_data = (char*) malloc(bitmap->header.imagesize);
 
-    return bitmap;
+    if(bitmap->pixel_data == NULL)
+    {
+        // Not enough memory
+        return 3;
+    }
+
+    memcpy(bitmap->pixel_data, data + bitmap->header.dataoffset, bitmap->header.imagesize);
+
+    return 0;
 }

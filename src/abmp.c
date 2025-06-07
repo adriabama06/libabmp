@@ -41,7 +41,11 @@ void abmp_hello(void) {
 
     printf("%d: %dx%dx3+%dx%d =? %d\n", status, header.width, header.height, padding, header.height, header.imagesize);
 
-    ABMP_BITMAP bmp = abmp_read_data(data, header);
+    ABMP_BITMAP bmp;
+
+    bmp.header = header; // or directly create ^^^ bmp and pass to abmp_read_header(data, &bmp.header);
+    
+    status = abmp_read_data(data, &bmp);
 
     free(data);
     fclose(f);
