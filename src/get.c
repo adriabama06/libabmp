@@ -4,7 +4,7 @@
 #include <memory.h>
 #include <stdlib.h>
 
-uint32_t abmp_get_pixel_raw_position(ABMP_BITMAP_HEADER header, uint32_t x, uint32_t y)
+uint32_t abmp_get_pixel_raw_position(ABMP_BITMAP_HEADER* header, uint32_t x, uint32_t y)
 {
     // Note: It starts from bottom left, it means:
     /* x=0, y=0:
@@ -41,7 +41,7 @@ uint32_t abmp_get_pixel_raw_position(ABMP_BITMAP_HEADER header, uint32_t x, uint
     // move down y times rows
     // + padding*y to skip y times the padding
     // + x in the current line
-    return header.width * y * 3 + (header.width % 4) * y + 3 * x;
+    return header->width * y * 3 + (header->width % 4) * y + 3 * x;
 }
 
 /* Why this function? As a human you view the image starting from top left, like when we read, but in bmp the data is stored in this order:
@@ -60,7 +60,7 @@ In the bmp file is stored as:
 From left to right the order stills the same, but the image is flipped vertically.
 This function reverses the vertical order using (header.height - y)
 */
-uint32_t abmp_get_pixel_position_from_top_left(ABMP_BITMAP_HEADER header, uint32_t x, uint32_t y)
+uint32_t abmp_get_pixel_position_from_top_left(ABMP_BITMAP_HEADER* header, uint32_t x, uint32_t y)
 {
     // Note: It starts from top left, it means:
     /* x=0, y=0:
@@ -100,5 +100,5 @@ uint32_t abmp_get_pixel_position_from_top_left(ABMP_BITMAP_HEADER header, uint32
     // move down y times rows
     // + padding*y to skip y times the padding
     // + x in the current line
-    return header.width * (header.height - y - 1) * 3 + (header.width % 4) * (header.height - y - 1) + 3 * x;
+    return header->width * (header->height - y - 1) * 3 + (header->width % 4) * (header->height - y - 1) + 3 * x;
 }

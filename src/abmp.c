@@ -87,24 +87,24 @@ void abmp_hello(void) {
 
     // First +2,+1,+0 --> Because of the conversion of BGR -> RGB
     printf("0, 0 : (%d,%d,%d)\n",
-        bmp.pixel_data[abmp_get_pixel_raw_position(bmp.header, 0, 0) + 2],
-        bmp.pixel_data[abmp_get_pixel_raw_position(bmp.header, 0, 0) + 1],
-        bmp.pixel_data[abmp_get_pixel_raw_position(bmp.header, 0, 0)]);
+        bmp.pixel_data[abmp_get_pixel_raw_position(&bmp.header, 0, 0) + 2],
+        bmp.pixel_data[abmp_get_pixel_raw_position(&bmp.header, 0, 0) + 1],
+        bmp.pixel_data[abmp_get_pixel_raw_position(&bmp.header, 0, 0)]);
     
     printf("0, 0 : (%d,%d,%d)\n",
-        bmp.pixel_data[abmp_get_pixel_position_from_top_left(bmp.header, 0, 0) + 2],
-        bmp.pixel_data[abmp_get_pixel_position_from_top_left(bmp.header, 0, 0) + 1],
-        bmp.pixel_data[abmp_get_pixel_position_from_top_left(bmp.header, 0, 0)]);
+        bmp.pixel_data[abmp_get_pixel_position_from_top_left(&bmp.header, 0, 0) + 2],
+        bmp.pixel_data[abmp_get_pixel_position_from_top_left(&bmp.header, 0, 0) + 1],
+        bmp.pixel_data[abmp_get_pixel_position_from_top_left(&bmp.header, 0, 0)]);
     
     printf("2, 0 : (%d,%d,%d)\n",
-        bmp.pixel_data[abmp_get_pixel_raw_position(bmp.header, 2, 0) + 2],
-        bmp.pixel_data[abmp_get_pixel_raw_position(bmp.header, 2, 0) + 1],
-        bmp.pixel_data[abmp_get_pixel_raw_position(bmp.header, 2, 0)]);
+        bmp.pixel_data[abmp_get_pixel_raw_position(&bmp.header, 2, 0) + 2],
+        bmp.pixel_data[abmp_get_pixel_raw_position(&bmp.header, 2, 0) + 1],
+        bmp.pixel_data[abmp_get_pixel_raw_position(&bmp.header, 2, 0)]);
 
     printf("2, 0 : (%d,%d,%d)\n",
-        bmp.pixel_data[abmp_get_pixel_position_from_top_left(bmp.header, 2, 0) + 2],
-        bmp.pixel_data[abmp_get_pixel_position_from_top_left(bmp.header, 2, 0) + 1],
-        bmp.pixel_data[abmp_get_pixel_position_from_top_left(bmp.header, 2, 0)]);
+        bmp.pixel_data[abmp_get_pixel_position_from_top_left(&bmp.header, 2, 0) + 2],
+        bmp.pixel_data[abmp_get_pixel_position_from_top_left(&bmp.header, 2, 0) + 1],
+        bmp.pixel_data[abmp_get_pixel_position_from_top_left(&bmp.header, 2, 0)]);
 
 
     free(bmp.pixel_data);
