@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdlib.h>
 
 #ifndef ABMP_ABITMAP_H
 #define ABMP_ABITMAP_H

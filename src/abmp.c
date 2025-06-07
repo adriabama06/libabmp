@@ -34,16 +34,18 @@ void abmp_hello(void) {
 
     fread(data, sizeof(char), len, f);
 
-    ABMP_BITMAP_HEADER header = abmp_read_header(data);
+    ABMP_BITMAP_HEADER header;
+    
+    size_t status = abmp_read_header(data, &header);
+    int padding = header.width % 4;
 
-    printf("%dx%d\n", header.width, header.height);
+    printf("%d: %dx%dx3+%dx%d =? %d\n", status, header.width, header.height, padding, header.height, header.imagesize);
 
     ABMP_BITMAP bmp = abmp_read_data(data, header);
 
     free(data);
     fclose(f);
 
-    int padding = bmp.header.width % 4;
 
     printf("--- V1 ---\n");
 
