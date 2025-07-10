@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 void abmp_hello(void) {
-    printf("Hello world from libabmp\n");
+    printf("abmp_hello()\n");
 
     ABMP_BITMAP test;
     printf("ABMP_BITMAP_HEADER = %d\n", sizeof(test.header));
@@ -108,4 +108,158 @@ void abmp_hello(void) {
 
 
     free(bmp.pixel_data);
+}
+
+void abmp_hello2(void)
+{
+    printf("abmp_hello2()\n");
+
+    char path[] = "/workspaces/libabmp/samples/twoofpadding.bmp";
+
+    ABMP_BITMAP bitmap;
+
+    size_t status = abmp_read_file(path, &bitmap);
+
+    printf("Reading %s status: %d\n", path, status);
+
+    printf("--- V1 ---\n");
+
+    int padding = bitmap.header.width % 4;
+
+    printf("%dx%dx3+%dx%d =? %d\n", bitmap.header.width, bitmap.header.height, padding, bitmap.header.height, bitmap.header.imagesize);
+
+
+    for (int i = 0; i < bitmap.header.imagesize;)
+    {
+        for (int j = 0; j < bitmap.header.width; j++)
+        {
+            uint8_t b = bitmap.pixel_data[i++];
+            uint8_t g = bitmap.pixel_data[i++];
+            uint8_t r = bitmap.pixel_data[i++];
+
+            printf("(%d,%d,%d) ", r, g, b);
+        }
+        printf("\n");
+
+        i += padding;
+    }
+
+    printf("--- V2 (Fixed vertically) ---\n");
+
+    for (int i = 0; i < bitmap.header.height; i++) // this is easy to convert directly into a single math eval to get the position based on x & y --> abmp_get_pixel(bmp, x, y);
+    {
+        for (int j = 0; j < bitmap.header.width; j++)
+        {
+            uint8_t b = bitmap.pixel_data[bitmap.header.width*(bitmap.header.height - i - 1)*3 + padding*(bitmap.header.height - i - 1) + 3*j];
+            uint8_t g = bitmap.pixel_data[bitmap.header.width*(bitmap.header.height - i - 1)*3 + padding*(bitmap.header.height - i - 1) + 3*j + 1];
+            uint8_t r = bitmap.pixel_data[bitmap.header.width*(bitmap.header.height - i - 1)*3 + padding*(bitmap.header.height - i - 1) + 3*j + 2];
+
+            printf("(%d,%d,%d) ", r, g, b);
+        }
+        printf("\n");
+    }
+
+    printf("--- Direct pixels V1 ---\n");
+
+    // First +2,+1,+0 --> Because of the conversion of BGR -> RGB
+    printf("0, 0 : (%d,%d,%d)\n",
+        bitmap.pixel_data[abmp_get_pixel_raw_position(&bitmap.header, 0, 0) + 2],
+        bitmap.pixel_data[abmp_get_pixel_raw_position(&bitmap.header, 0, 0) + 1],
+        bitmap.pixel_data[abmp_get_pixel_raw_position(&bitmap.header, 0, 0)]);
+    
+    printf("0, 0 : (%d,%d,%d)\n",
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 0, 0) + 2],
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 0, 0) + 1],
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 0, 0)]);
+    
+    printf("2, 0 : (%d,%d,%d)\n",
+        bitmap.pixel_data[abmp_get_pixel_raw_position(&bitmap.header, 2, 0) + 2],
+        bitmap.pixel_data[abmp_get_pixel_raw_position(&bitmap.header, 2, 0) + 1],
+        bitmap.pixel_data[abmp_get_pixel_raw_position(&bitmap.header, 2, 0)]);
+
+    printf("2, 0 : (%d,%d,%d)\n",
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 0) + 2],
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 0) + 1],
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 0)]);
+
+    abmp_free(&bitmap);
+}
+
+void abmp_hello3(void)
+{
+    printf("abmp_hello3()\n");
+
+    char path[] = "/workspaces/libabmp/samples/twoofpadding.bmp";
+
+    FILE* file = fopen(path, "rb");
+
+    ABMP_BITMAP bitmap;
+
+    size_t status = abmp_read_file_p(file, &bitmap);
+
+    fclose(file);
+
+    printf("Reading %s status: %d\n", path, status);
+
+    printf("--- V1 ---\n");
+
+    int padding = bitmap.header.width % 4;
+
+    printf("%dx%dx3+%dx%d =? %d\n", bitmap.header.width, bitmap.header.height, padding, bitmap.header.height, bitmap.header.imagesize);
+
+
+    for (int i = 0; i < bitmap.header.imagesize;)
+    {
+        for (int j = 0; j < bitmap.header.width; j++)
+        {
+            uint8_t b = bitmap.pixel_data[i++];
+            uint8_t g = bitmap.pixel_data[i++];
+            uint8_t r = bitmap.pixel_data[i++];
+
+            printf("(%d,%d,%d) ", r, g, b);
+        }
+        printf("\n");
+
+        i += padding;
+    }
+
+    printf("--- V2 (Fixed vertically) ---\n");
+
+    for (int i = 0; i < bitmap.header.height; i++) // this is easy to convert directly into a single math eval to get the position based on x & y --> abmp_get_pixel(bmp, x, y);
+    {
+        for (int j = 0; j < bitmap.header.width; j++)
+        {
+            uint8_t b = bitmap.pixel_data[bitmap.header.width*(bitmap.header.height - i - 1)*3 + padding*(bitmap.header.height - i - 1) + 3*j];
+            uint8_t g = bitmap.pixel_data[bitmap.header.width*(bitmap.header.height - i - 1)*3 + padding*(bitmap.header.height - i - 1) + 3*j + 1];
+            uint8_t r = bitmap.pixel_data[bitmap.header.width*(bitmap.header.height - i - 1)*3 + padding*(bitmap.header.height - i - 1) + 3*j + 2];
+
+            printf("(%d,%d,%d) ", r, g, b);
+        }
+        printf("\n");
+    }
+
+    printf("--- Direct pixels V1 ---\n");
+
+    // First +2,+1,+0 --> Because of the conversion of BGR -> RGB
+    printf("0, 0 : (%d,%d,%d)\n",
+        bitmap.pixel_data[abmp_get_pixel_raw_position(&bitmap.header, 0, 0) + 2],
+        bitmap.pixel_data[abmp_get_pixel_raw_position(&bitmap.header, 0, 0) + 1],
+        bitmap.pixel_data[abmp_get_pixel_raw_position(&bitmap.header, 0, 0)]);
+    
+    printf("0, 0 : (%d,%d,%d)\n",
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 0, 0) + 2],
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 0, 0) + 1],
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 0, 0)]);
+    
+    printf("2, 0 : (%d,%d,%d)\n",
+        bitmap.pixel_data[abmp_get_pixel_raw_position(&bitmap.header, 2, 0) + 2],
+        bitmap.pixel_data[abmp_get_pixel_raw_position(&bitmap.header, 2, 0) + 1],
+        bitmap.pixel_data[abmp_get_pixel_raw_position(&bitmap.header, 2, 0)]);
+
+    printf("2, 0 : (%d,%d,%d)\n",
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 0) + 2],
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 0) + 1],
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 0)]);
+
+    abmp_free(&bitmap);
 }

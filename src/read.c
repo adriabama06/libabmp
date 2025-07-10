@@ -39,7 +39,7 @@ size_t __BMP_MEMORY_OFFSETS(size_t count)
  */
 size_t abmp_read_header(uint8_t* data, ABMP_BITMAP_HEADER* header)
 {
-    if(sizeof(ABMP_BITMAP_HEADER) == 54) 
+    if(sizeof(ABMP_BITMAP_HEADER) == ABMP_HEADER_SIZE) 
     {
         memcpy(header, data, sizeof(ABMP_BITMAP_HEADER));
     }
@@ -104,4 +104,57 @@ size_t abmp_read_data(uint8_t* data, ABMP_BITMAP* bitmap)
     memcpy(bitmap->pixel_data, data + bitmap->header.dataoffset, bitmap->header.imagesize);
 
     return 0;
+}
+
+size_t abmp_read_file_p(FILE* file, ABMP_BITMAP* bitmap)
+{
+    // Get the file size
+    fseek(file, 0, SEEK_END);
+
+    long file_size = ftell(file);
+
+    if(file_size < ABMP_HEADER_SIZE)
+    {
+        return 4;
+    }
+
+    // Copy the file content
+    char* file_data = (char*) malloc(file_size * sizeof(char));
+
+    rewind(file);
+
+    fread(file_data, sizeof(char), file_size, file);
+
+    // Read header & pixel_data
+    size_t status = abmp_read_header(file_data, &bitmap->header);
+
+    if(status != 0) return status;
+
+    status = abmp_read_data(file_data, bitmap);
+
+    free(file_data);
+
+    return status;
+}
+
+size_t abmp_read_file(char* path, ABMP_BITMAP* bitmap)
+{
+    // Open file
+    FILE* file = fopen(path, "rb");
+
+    if(file == NULL)
+    {
+        return 5;
+    }
+
+    size_t status = abmp_read_file_p(file, bitmap);
+
+    fclose(file);
+
+    return status;
+}
+
+void abmp_free(ABMP_BITMAP* bitmap)
+{
+    free(bitmap->pixel_data);
 }
