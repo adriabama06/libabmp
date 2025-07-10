@@ -7,6 +7,8 @@
         "array": "c",
         "string": "c",
         "string_view": "c",
-        "memory.h": "c"
+        "memory.h": "c",
+        "stdlib.h": "c",
+        "stdint.h": "c"
     }
 }

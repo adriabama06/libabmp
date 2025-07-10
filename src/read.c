@@ -37,7 +37,7 @@ size_t __BMP_MEMORY_OFFSETS(size_t count)
 /**
  * It returns 0 if ok, any other code means other errors
  */
-size_t abmp_read_header(uint8_t* data, ABMP_BITMAP_HEADER* header)
+ABMP_ERRORS abmp_read_header(uint8_t* data, ABMP_BITMAP_HEADER* header)
 {
     if(sizeof(ABMP_BITMAP_HEADER) == ABMP_HEADER_SIZE) 
     {
@@ -67,30 +67,30 @@ size_t abmp_read_header(uint8_t* data, ABMP_BITMAP_HEADER* header)
     if(header->signature[0] != 'B' && header->signature[1] != 'M')
     {
         // This is not a BMP file or it's corrupted. Let the user wipe by it self the header data.
-        return 1;
+        return ABMP_IS_NOT_BMP_FILE;
     }
 
     if(header->width * header->height * 3 + (header->width % 4) * header->height != header->imagesize && header->imagesize != 0) // It is valid to set imagesize = 0 if compression = 0
     {
         // A: This is not a BMP file, B: The file is wrong.
-        return 2;
+        return ABMP_BMP_DATA_IS_CORRUPTED;
     }
 
-    return 0;
+    return ABMP_OK;
 }
 
-size_t abmp_read_data(uint8_t* data, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_read_data(uint8_t* data, ABMP_BITMAP* bitmap)
 {
     if(bitmap->header.compression != 0)
     {
         // Has compression
-        return 1;
+        return ABMP_COMPRESSION_IS_NOT_SUPPORTED;
     }
 
     if(bitmap->header.bits_per_pixel <= 8)
     {
         // Do something with ColorTable
-        return 2;
+        return ABMP_LOW_BITS_PER_PIXEL_IS_NOT_SUPPORTED;
     }
 
     bitmap->pixel_data = (char*) malloc(bitmap->header.imagesize);
@@ -98,15 +98,15 @@ size_t abmp_read_data(uint8_t* data, ABMP_BITMAP* bitmap)
     if(bitmap->pixel_data == NULL)
     {
         // Not enough memory
-        return 3;
+        return ABMP_OUT_OF_MEMORY;
     }
 
     memcpy(bitmap->pixel_data, data + bitmap->header.dataoffset, bitmap->header.imagesize);
 
-    return 0;
+    return ABMP_OK;
 }
 
-size_t abmp_read_file_p(FILE* file, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_read_file_p(FILE* file, ABMP_BITMAP* bitmap)
 {
     // Get the file size
     fseek(file, 0, SEEK_END);
@@ -115,7 +115,7 @@ size_t abmp_read_file_p(FILE* file, ABMP_BITMAP* bitmap)
 
     if(file_size < ABMP_HEADER_SIZE)
     {
-        return 4;
+        return ABMP_FILE_SIZE_IS_LOWER_THAN_HEADER_SIZE;
     }
 
     // Copy the file content
@@ -137,14 +137,14 @@ size_t abmp_read_file_p(FILE* file, ABMP_BITMAP* bitmap)
     return status;
 }
 
-size_t abmp_read_file(char* path, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_read_file(char* path, ABMP_BITMAP* bitmap)
 {
     // Open file
     FILE* file = fopen(path, "rb");
 
     if(file == NULL)
     {
-        return 5;
+        return ABMP_FILE_NOT_EXIST;
     }
 
     size_t status = abmp_read_file_p(file, bitmap);
