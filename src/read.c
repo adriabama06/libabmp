@@ -126,7 +126,7 @@ ABMP_ERRORS abmp_read_file_p(FILE* file, ABMP_BITMAP* bitmap)
     fread(file_data, sizeof(char), file_size, file);
 
     // Read header & pixel_data
-    size_t status = abmp_read_header(file_data, &bitmap->header);
+    ABMP_ERRORS status = abmp_read_header(file_data, &bitmap->header);
 
     if(status != 0) return status;
 
@@ -147,7 +147,7 @@ ABMP_ERRORS abmp_read_file(char* path, ABMP_BITMAP* bitmap)
         return ABMP_FILE_NOT_EXIST;
     }
 
-    size_t status = abmp_read_file_p(file, bitmap);
+    ABMP_ERRORS status = abmp_read_file_p(file, bitmap);
 
     fclose(file);
 
