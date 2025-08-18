@@ -1,10 +1,7 @@
 #include "abmp.h"
 
-#include <stdio.h>
-#include <memory.h>
-#include <stdlib.h>
-
-const char __BMP_MEMORY_SIZES[] = {
+// Define extern const unsigned long __BMP_MEMORY_SIZES[];
+const unsigned long __BMP_MEMORY_SIZES[] = {
     sizeof(uint8_t) * 2,
     sizeof(uint32_t),
     sizeof(uint32_t),
@@ -46,7 +43,7 @@ ABMP_ERRORS abmp_read_header(uint8_t* data, ABMP_BITMAP_HEADER* header)
     else // This means __attribute__((__packed__)) is not working, leaving to a manual read
     {
         size_t count = 0;
-        
+
         memcpy(&header->signature,        data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
         memcpy(&header->filesize,         data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
         memcpy(&header->reserved,         data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
@@ -108,6 +105,8 @@ ABMP_ERRORS abmp_read_data(uint8_t* data, ABMP_BITMAP* bitmap)
 
 ABMP_ERRORS abmp_read_file_p(FILE* file, ABMP_BITMAP* bitmap)
 {
+    ABMP_ERRORS status;
+
     // Get the file size
     fseek(file, 0, SEEK_END);
 
@@ -123,12 +122,22 @@ ABMP_ERRORS abmp_read_file_p(FILE* file, ABMP_BITMAP* bitmap)
 
     rewind(file);
 
-    fread(file_data, sizeof(char), file_size, file);
+    size_t f_status = fread(file_data, sizeof(char), file_size, file);
+
+    if(f_status != file_size)
+    {
+        free(file_data);
+        return ABMP_ERROR_READING_FILE;
+    }
 
     // Read header & pixel_data
-    ABMP_ERRORS status = abmp_read_header(file_data, &bitmap->header);
+    status = abmp_read_header(file_data, &bitmap->header);
 
-    if(status != 0) return status;
+    if(status != ABMP_OK)
+    {
+        free(file_data);
+        return status;
+    }
 
     status = abmp_read_data(file_data, bitmap);
 

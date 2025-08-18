@@ -8,6 +8,7 @@ add_compile_definitions(ABMP_ABITMAP_NOT_USE_PACKED_HEADER=0)
 add_library(abmp STATIC
     src/abmp.c
     src/read.c
+    src/write.c
     src/get.c
 )
 

@@ -263,3 +263,40 @@ void abmp_hello3(void)
 
     abmp_free(&bitmap);
 }
+
+void abmp_hello4(void)
+{
+    ABMP_ERRORS status;
+
+    printf("abmp_hello3()\n");
+
+    char input_path[] = "/workspaces/libabmp/samples/twoofpadding.bmp";
+    char output_path[] = "/workspaces/libabmp/samples/twoofpadding_edit.bmp";
+
+    ABMP_BITMAP bitmap;
+
+    status = abmp_read_file(input_path, &bitmap);
+
+    printf("2, 2 : (%d,%d,%d)\n",
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 2],
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 1],
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2)]);
+
+    // BGR -- RGB(255,255,0) is Yellow -- BGR(0,255,255) is Yellow
+    bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2)] = 0;
+    bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 1] = 255;
+    bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 2] = 255;
+
+    printf("2, 2 : (%d,%d,%d)\n",
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 2],
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 1],
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2)]);
+
+    status = abmp_write_file(output_path, &bitmap);
+
+    printf("status = %d\n", status);
+
+    printf("Done copy from %s to %s and edit in (2, 2)\n", input_path, output_path);
+
+    abmp_free(&bitmap);
+}
