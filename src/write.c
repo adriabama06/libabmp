@@ -63,6 +63,8 @@ ABMP_ERRORS abmp_write_file_p(FILE* file, ABMP_BITMAP* bitmap)
 
     uint8_t* file_data = abmp_allocate_writer(&bitmap->header);
 
+    if(file_data == NULL) return ABMP_OUT_OF_MEMORY;
+
     status = abmp_write_header(file_data, &bitmap->header);
 
     if(status != ABMP_OK)
@@ -79,7 +81,7 @@ ABMP_ERRORS abmp_write_file_p(FILE* file, ABMP_BITMAP* bitmap)
         return status;
     }
 
-    size_t f_status = fwrite(file_data, sizeof(char), bitmap->header.dataoffset + bitmap->header.imagesize, file);
+    size_t f_status = fwrite(file_data, sizeof(uint8_t), bitmap->header.dataoffset + bitmap->header.imagesize, file);
 
     free(file_data);
 
@@ -96,10 +98,7 @@ ABMP_ERRORS abmp_write_file(char* path, ABMP_BITMAP* bitmap)
     // Open file
     FILE* file = fopen(path, "wb");
 
-    if(file == NULL)
-    {
-        return ABMP_ERROR_OPENING_FILE;
-    }
+    if(file == NULL) return ABMP_ERROR_OPENING_FILE;
 
     ABMP_ERRORS status = abmp_write_file_p(file, bitmap);
 

@@ -32,18 +32,35 @@ typedef enum ABMP_ERRORS_E {
     ABMP_ERROR_OPENING_FILE
 } ABMP_ERRORS;
 
+/* WORKING ON MEMORY (memory -> memory | memory -> memory) */
+// Read
 ABMP_ERRORS abmp_read_header(uint8_t* data, ABMP_BITMAP_HEADER* header);
 ABMP_ERRORS abmp_read_data(uint8_t* data, ABMP_BITMAP* bitmap);
 ABMP_ERRORS abmp_read_file_p(FILE* file, ABMP_BITMAP* bitmap);
 ABMP_ERRORS abmp_read_file(char* path, ABMP_BITMAP* bitmap);
 void abmp_free(ABMP_BITMAP* bitmap);
 
+// Write
 uint8_t* abmp_allocate_writer(ABMP_BITMAP_HEADER* header);
 ABMP_ERRORS abmp_write_header(uint8_t* data, ABMP_BITMAP_HEADER* header);
 ABMP_ERRORS abmp_write_data(uint8_t* data, ABMP_BITMAP* bitmap);
 ABMP_ERRORS abmp_write_file_p(FILE* file, ABMP_BITMAP* bitmap);
 ABMP_ERRORS abmp_write_file(char* path, ABMP_BITMAP* bitmap);
 
+/* WORKING DIRECTLY FROM A FILE (file -> memory | memory -> file) */
+// Read
+ABMP_ERRORS abmp_file_read_header(FILE* file, ABMP_BITMAP_HEADER* header);
+ABMP_ERRORS abmp_file_read_data(FILE* file, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_file_read_file_p(FILE* file, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_file_read_file(char* path, ABMP_BITMAP* bitmap);
+
+// Write
+ABMP_ERRORS abmp_file_write_header(FILE* file, ABMP_BITMAP_HEADER* header);
+ABMP_ERRORS abmp_file_write_data(FILE* file, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_file_write_file_p(FILE* file, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_file_write_file(char* path, ABMP_BITMAP* bitmap);
+
+/* Bitmap helpers */
 uint32_t abmp_get_pixel_raw_position(ABMP_BITMAP_HEADER* header, uint32_t x, uint32_t y);
 uint32_t abmp_get_pixel_position_from_top_left(ABMP_BITMAP_HEADER* header, uint32_t x, uint32_t y);
 
@@ -52,6 +69,7 @@ void abmp_hello(void);
 void abmp_hello2(void);
 void abmp_hello3(void);
 void abmp_hello4(void);
+void abmp_hello5(void);
 
 #ifdef __cplusplus
 }

@@ -90,13 +90,10 @@ ABMP_ERRORS abmp_read_data(uint8_t* data, ABMP_BITMAP* bitmap)
         return ABMP_LOW_BITS_PER_PIXEL_IS_NOT_SUPPORTED;
     }
 
-    bitmap->pixel_data = (char*) malloc(bitmap->header.imagesize);
+    bitmap->pixel_data = (uint8_t*) malloc(bitmap->header.imagesize);
 
-    if(bitmap->pixel_data == NULL)
-    {
-        // Not enough memory
-        return ABMP_OUT_OF_MEMORY;
-    }
+    // Not enough memory
+    if(bitmap->pixel_data == NULL) return ABMP_OUT_OF_MEMORY;
 
     memcpy(bitmap->pixel_data, data + bitmap->header.dataoffset, bitmap->header.imagesize);
 
@@ -107,22 +104,23 @@ ABMP_ERRORS abmp_read_file_p(FILE* file, ABMP_BITMAP* bitmap)
 {
     ABMP_ERRORS status;
 
+    long file_start = ftell(file);
+
     // Get the file size
     fseek(file, 0, SEEK_END);
 
-    long file_size = ftell(file);
+    long file_size = ftell(file) - file_start;
 
-    if(file_size < ABMP_HEADER_SIZE)
-    {
-        return ABMP_FILE_SIZE_IS_LOWER_THAN_HEADER_SIZE;
-    }
+    if(file_size < ABMP_HEADER_SIZE) return ABMP_FILE_SIZE_IS_LOWER_THAN_HEADER_SIZE;
 
     // Copy the file content
-    char* file_data = (char*) malloc(file_size * sizeof(char));
+    uint8_t* file_data = (uint8_t*) malloc(file_size * sizeof(uint8_t));
 
-    rewind(file);
+    if(file_data == NULL) return ABMP_OUT_OF_MEMORY;
 
-    size_t f_status = fread(file_data, sizeof(char), file_size, file);
+    fseek(file, file_start, SEEK_SET);
+
+    size_t f_status = fread(file_data, sizeof(uint8_t), file_size, file);
 
     if(f_status != file_size)
     {
@@ -151,10 +149,7 @@ ABMP_ERRORS abmp_read_file(char* path, ABMP_BITMAP* bitmap)
     // Open file
     FILE* file = fopen(path, "rb");
 
-    if(file == NULL)
-    {
-        return ABMP_FILE_NOT_EXIST;
-    }
+    if(file == NULL) return ABMP_FILE_NOT_EXIST;
 
     ABMP_ERRORS status = abmp_read_file_p(file, bitmap);
 
