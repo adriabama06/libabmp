@@ -7,5 +7,7 @@ int main() {
 
     abmp_hello4();
     abmp_hello5();
+
+    abmp_hello6();
     return 0;
 }

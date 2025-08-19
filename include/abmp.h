@@ -63,6 +63,7 @@ ABMP_ERRORS abmp_file_write_file(char* path, ABMP_BITMAP* bitmap);
 /* Bitmap helpers */
 uint32_t abmp_get_pixel_raw_position(ABMP_BITMAP_HEADER* header, uint32_t x, uint32_t y);
 uint32_t abmp_get_pixel_position_from_top_left(ABMP_BITMAP_HEADER* header, uint32_t x, uint32_t y);
+ABMP_ERRORS abmp_create_bitmap(ABMP_BITMAP* bitmap, uint32_t width, uint32_t height);
 
 // Only aviable during development for testing
 void abmp_hello(void);
@@ -70,6 +71,7 @@ void abmp_hello2(void);
 void abmp_hello3(void);
 void abmp_hello4(void);
 void abmp_hello5(void);
+void abmp_hello6(void);
 
 #ifdef __cplusplus
 }

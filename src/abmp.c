@@ -3,6 +3,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void abmp_print_header(ABMP_BITMAP_HEADER* header)
+{
+    printf("signature: %c%c\n", header->signature[0], header->signature[1]);
+    printf("filesize: %d\n", header->filesize);
+    printf("reserved: %d\n", header->reserved);
+    printf("dataoffset: %d\n", header->dataoffset);
+    printf("size: %d\n", header->size);
+    printf("width: %d\n", header->width);
+    printf("height: %d\n", header->height);
+    printf("planes: %d\n", header->planes);
+    printf("bits_per_pixel: %d\n", header->bits_per_pixel);
+    printf("compression: %d\n", header->compression);
+    printf("imagesize: %d\n", header->imagesize);
+    printf("y_pixels_per_m: %d\n", header->y_pixels_per_m);
+    printf("x_pixels_per_m: %d\n", header->x_pixels_per_m);
+    printf("colors_used: %d\n", header->colors_used);
+    printf("important_colors: %d\n", header->important_colors);
+}
+
 void abmp_hello(void) {
     printf("abmp_hello()\n");
 
@@ -316,6 +335,8 @@ void abmp_hello5(void)
 
     status = abmp_file_read_file(input_path, &bitmap);
 
+    abmp_print_header(&bitmap.header);
+
     printf("status = %d\n", status);
 
     printf("2, 2 : (%d,%d,%d)\n",
@@ -338,6 +359,47 @@ void abmp_hello5(void)
     printf("status = %d\n", status);
 
     printf("Done copy from %s to %s and edit in (2, 2)\n", input_path, output_path);
+
+    abmp_free(&bitmap);
+}
+
+void abmp_hello6(void)
+{
+    ABMP_ERRORS status;
+
+    printf("abmp_hello6()\n");
+
+    char output_path[] = "/workspaces/libabmp/samples/generated.bmp";
+
+    ABMP_BITMAP bitmap;
+
+    status = abmp_create_bitmap(&bitmap, 5, 5);
+
+    abmp_print_header(&bitmap.header);
+
+    printf("status = %d\n", status);
+
+    // By default all must be white
+    printf("2, 2 : (%d,%d,%d)\n",
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 2],
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 1],
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2)]);
+
+    // BGR -- RGB(255,0,0) is Red -- BGR(0,0,255) is Red    
+    bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2)] = 0;
+    bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 1] = 0;
+    bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 2] = 255;
+
+    printf("2, 2 : (%d,%d,%d)\n",
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 2],
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 1],
+        bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2)]);
+
+    status = abmp_file_write_file(output_path, &bitmap);
+
+    printf("status = %d\n", status);
+
+    printf("Generated file %s\n", output_path);
 
     abmp_free(&bitmap);
 }

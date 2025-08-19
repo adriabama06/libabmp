@@ -15,6 +15,7 @@ add_library(abmp STATIC
     src/file_write.c
 
     src/get.c
+    src/create.c
 )
 
 target_include_directories(abmp PUBLIC
