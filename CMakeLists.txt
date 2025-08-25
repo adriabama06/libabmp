@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(libabmp VERSION 1.0.0 LANGUAGES C)
+project(libabmp VERSION 1.0.1 LANGUAGES C)
 
 # Set ABMP_ABITMAP_NOT_USE_PACKED_HEADER to 0 by default
 add_compile_definitions(ABMP_ABITMAP_NOT_USE_PACKED_HEADER=0)
