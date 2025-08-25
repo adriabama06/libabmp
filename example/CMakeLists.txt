@@ -16,7 +16,7 @@ set(FETCHCONTENT_QUIET OFF)
 
 FetchContent_Declare(abmp
   GIT_REPOSITORY https://github.com/adriabama06/libabmp.git
-  GIT_TAG        v1.0.0
+  GIT_TAG        main
   GIT_PROGRESS   TRUE
   GIT_SHALLOW    TRUE
   EXCLUDE_FROM_ALL
