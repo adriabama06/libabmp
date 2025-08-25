@@ -14,15 +14,15 @@ include(FetchContent)
 set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
 set(FETCHCONTENT_QUIET OFF)
 
-FetchContent_Declare(abmp
+FetchContent_Declare(libabmp
   GIT_REPOSITORY https://github.com/adriabama06/libabmp.git
   GIT_TAG        main
   GIT_PROGRESS   TRUE
   GIT_SHALLOW    TRUE
   EXCLUDE_FROM_ALL
 )
-FetchContent_MakeAvailable(abmp)
+FetchContent_MakeAvailable(libabmp)
 
 target_link_libraries(example_libabmp
-    PRIVATE abmp
+    PRIVATE libabmp
 )
