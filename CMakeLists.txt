@@ -5,7 +5,7 @@ project(libabmp VERSION 1.0.0 LANGUAGES C)
 add_compile_definitions(ABMP_ABITMAP_NOT_USE_PACKED_HEADER=0)
 
 # Library target
-add_library(abmp STATIC
+add_library(libabmp STATIC
     src/abmp.c
 
     src/read.c
@@ -18,9 +18,9 @@ add_library(abmp STATIC
     src/create.c
 )
 
-target_include_directories(abmp PUBLIC
+target_include_directories(libabmp PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 # Example executable
-add_subdirectory(example)
+# add_subdirectory(example)
