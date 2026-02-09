@@ -1,24 +1,5 @@
 #include "abmp.h"
 
-// Define extern const unsigned long __BMP_MEMORY_SIZES[];
-const unsigned long __BMP_MEMORY_SIZES[] = {
-    sizeof(uint8_t) * 2,
-    sizeof(uint32_t),
-    sizeof(uint32_t),
-    sizeof(uint32_t),
-    sizeof(uint32_t),
-    sizeof(uint32_t),
-    sizeof(uint32_t),
-    sizeof(uint16_t),
-    sizeof(uint16_t),
-    sizeof(uint32_t),
-    sizeof(uint32_t),
-    sizeof(uint32_t),
-    sizeof(uint32_t),
-    sizeof(uint32_t),
-    sizeof(uint32_t)
-};
-
 size_t __BMP_MEMORY_OFFSETS(size_t count)
 {
     size_t offset = 0;

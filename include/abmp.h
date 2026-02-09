@@ -14,7 +14,23 @@ extern "C" {
 #define ABMP_HEADER_SIZE 54
 
 // defined in the first line of read.c
-extern const unsigned long __BMP_MEMORY_SIZES[];
+static const unsigned long __BMP_MEMORY_SIZES[] = {
+    sizeof(uint8_t) * 2,
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint16_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t),
+    sizeof(uint32_t)
+};
 
 size_t __BMP_MEMORY_OFFSETS(size_t count);
 
