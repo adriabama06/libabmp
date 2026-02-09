@@ -1,10 +1,13 @@
-#include "abmp.h"
+#ifndef ABMP_GET_H
+#define ABMP_GET_H
 
-#include <stdio.h>
-#include <memory.h>
-#include <stdlib.h>
+#include "abitmap.h"
 
-uint32_t abmp_get_pixel_raw_position(ABMP_BITMAP_HEADER* header, uint32_t x, uint32_t y)
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+static inline uint32_t abmp_get_pixel_raw_position(ABMP_BITMAP_HEADER* header, uint32_t x, uint32_t y)
 {
     // Note: It starts from bottom left, it means:
     /* x=0, y=0:
@@ -60,7 +63,7 @@ In the bmp file is stored as:
 From left to right the order stills the same, but the image is flipped vertically.
 This function reverses the vertical order using (header.height - y)
 */
-uint32_t abmp_get_pixel_position_from_top_left(ABMP_BITMAP_HEADER* header, uint32_t x, uint32_t y)
+static inline uint32_t abmp_get_pixel_position_from_top_left(ABMP_BITMAP_HEADER* header, uint32_t x, uint32_t y)
 {
     // Note: It starts from top left, it means:
     /* x=0, y=0:
@@ -102,3 +105,9 @@ uint32_t abmp_get_pixel_position_from_top_left(ABMP_BITMAP_HEADER* header, uint3
     // + x in the current line
     return header->width * (header->height - y - 1) * 3 + (header->width % 4) * (header->height - y - 1) + 3 * x;
 }
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // ABMP_GET_H

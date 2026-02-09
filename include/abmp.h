@@ -77,8 +77,7 @@ ABMP_ERRORS abmp_file_write_file_p(FILE* file, ABMP_BITMAP* bitmap);
 ABMP_ERRORS abmp_file_write_file(char* path, ABMP_BITMAP* bitmap);
 
 /* Bitmap helpers */
-uint32_t abmp_get_pixel_raw_position(ABMP_BITMAP_HEADER* header, uint32_t x, uint32_t y);
-uint32_t abmp_get_pixel_position_from_top_left(ABMP_BITMAP_HEADER* header, uint32_t x, uint32_t y);
+#include "get.h"
 ABMP_ERRORS abmp_create_bitmap(ABMP_BITMAP* bitmap, uint32_t width, uint32_t height);
 void abmp_print_header(ABMP_BITMAP_HEADER* header);
 

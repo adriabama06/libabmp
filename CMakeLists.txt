@@ -14,7 +14,6 @@ add_library(libabmp STATIC
     src/file_read.c
     src/file_write.c
 
-    src/get.c
     src/create.c
 )
 
