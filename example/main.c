@@ -19,7 +19,7 @@ void abmp_hello(void) {
         printf("Padding for %d width: %d\n", i, i % 4);
     }
 
-    char path[] = "/workspaces/libabmp/samples/twoofpadding.bmp";
+    char path[] = "../../samples/twoofpadding.bmp";
 
     FILE* f = fopen(path, "rb");
     fseek(f, 0, SEEK_END);
@@ -111,7 +111,7 @@ void abmp_hello2(void)
 {
     printf("abmp_hello2()\n");
 
-    char path[] = "/workspaces/libabmp/samples/twoofpadding.bmp";
+    char path[] = "../../samples/twoofpadding.bmp";
 
     ABMP_BITMAP bitmap;
 
@@ -186,7 +186,7 @@ void abmp_hello3(void)
 {
     printf("abmp_hello3()\n");
 
-    char path[] = "/workspaces/libabmp/samples/twoofpadding.bmp";
+    char path[] = "../../samples/twoofpadding.bmp";
 
     FILE* file = fopen(path, "rb");
 
@@ -267,8 +267,8 @@ void abmp_hello4(void)
 
     printf("abmp_hello4()\n");
 
-    char input_path[] = "/workspaces/libabmp/samples/twoofpadding.bmp";
-    char output_path[] = "/workspaces/libabmp/samples/twoofpadding_edit.bmp";
+    char input_path[] = "../../samples/twoofpadding.bmp";
+    char output_path[] = "../../samples/twoofpadding_edit.bmp";
 
     ABMP_BITMAP bitmap;
 
@@ -306,8 +306,8 @@ void abmp_hello5(void)
 
     printf("abmp_hello5()\n");
 
-    char input_path[] = "/workspaces/libabmp/samples/twoofpadding.bmp";
-    char output_path[] = "/workspaces/libabmp/samples/twoofpadding_edit2.bmp";
+    char input_path[] = "../../samples/twoofpadding.bmp";
+    char output_path[] = "../../samples/twoofpadding_edit2.bmp";
 
     ABMP_BITMAP bitmap;
 
@@ -347,7 +347,7 @@ void abmp_hello6(void)
 
     printf("abmp_hello6()\n");
 
-    char output_path[] = "/workspaces/libabmp/samples/generated.bmp";
+    char output_path[] = "../generated.bmp";
 
     ABMP_BITMAP bitmap;
 
