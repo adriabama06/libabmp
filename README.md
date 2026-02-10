@@ -3,7 +3,7 @@
 A lightweight C library for reading and writing BMP files, implemented from scratch without external dependencies.
 
 ## Features
-- Supports 24-bit and 32-bit BMP formats
+- Supports only 24-bit BMP formats
 - Pure C implementation (no external libraries)
 - Minimal overhead with direct file I/O
 
