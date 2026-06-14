@@ -5,7 +5,7 @@ A lightweight C library for reading and writing BMP files, implemented from scra
 ## Features
 - Supports only 24-bit BMP formats
 - Pure C implementation (no external libraries)
-- Minimal overhead with direct file I/O
+- Read/Write from memory or disk
 
 ## Build Instructions
 
@@ -28,7 +28,7 @@ The example generates `output.bmp` using sample images from `samples/`.
 
 ## Project Structure
 - `include/`: Public headers (`abitmap.h`, `abmp.h`)
-- `src/`: Library implementation (24+ source files)
+- `src/`: Library implementation
 - `example/`: Demonstrates library usage
 - `samples/`: Input/output sample images
 
