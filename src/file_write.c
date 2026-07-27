@@ -2,7 +2,7 @@
 
 ABMP_ERRORS abmp_file_write_header(FILE* file, ABMP_BITMAP_HEADER* header)
 {
-    if(header->signature[0] != 'B' && header->signature[1] != 'M')
+    if(header->signature[0] != 'B' || header->signature[1] != 'M')
     {
         // This is not a BMP file or it's corrupted. Let the user wipe by it self the header data.
         return ABMP_IS_NOT_BMP_FILE;

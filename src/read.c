@@ -42,7 +42,7 @@ ABMP_ERRORS abmp_read_header(uint8_t* data, ABMP_BITMAP_HEADER* header)
         memcpy(&header->important_colors, data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
     }
 
-    if(header->signature[0] != 'B' && header->signature[1] != 'M')
+    if(header->signature[0] != 'B' || header->signature[1] != 'M')
     {
         // This is not a BMP file or it's corrupted. Let the user wipe by it self the header data.
         return ABMP_IS_NOT_BMP_FILE;
