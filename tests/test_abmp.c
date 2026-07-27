@@ -9,6 +9,7 @@
 #define ABMP_TEST_OUTPUT_PATH "libabmp_test_output.bmp"
 #endif
 
+/* Compare both BMP metadata and the complete BGR pixel payload after a round trip. */
 static int check_bitmap_equal(const ABMP_BITMAP *expected, const ABMP_BITMAP *actual)
 {
     assert(memcmp(&expected->header, &actual->header, sizeof(ABMP_BITMAP_HEADER)) == 0);
@@ -20,6 +21,7 @@ static int check_bitmap_equal(const ABMP_BITMAP *expected, const ABMP_BITMAP *ac
 static int test_create_and_pixel_positions(void)
 {
     ABMP_BITMAP bitmap = {0};
+    /* Width 3 forces three padding bytes per row, exercising row-stride logic. */
     assert(abmp_create_bitmap(&bitmap, 3, 2) == ABMP_OK);
 
     assert(bitmap.header.signature[0] == 'B');
@@ -32,9 +34,11 @@ static int test_create_and_pixel_positions(void)
     assert(bitmap.header.imagesize == 24); /* (3 * 3 + 3 padding) * 2 */
     assert(bitmap.header.filesize == 78);
 
+    /* Newly-created images are initialized to white, including padding bytes. */
     for (uint32_t i = 0; i < bitmap.header.imagesize; ++i)
         assert(bitmap.pixel_data[i] == 255);
 
+    /* BMP rows are stored bottom-up; the helper exposes both coordinate systems. */
     assert(abmp_get_pixel_raw_position(&bitmap.header, 0, 0) == 0);
     assert(abmp_get_pixel_raw_position(&bitmap.header, 2, 1) == 18);
     assert(abmp_get_pixel_position_from_top_left(&bitmap.header, 0, 0) == 12);
@@ -61,6 +65,7 @@ static int test_memory_round_trip(void)
     if (make_bitmap(&original) != 0)
         return 1;
 
+    /* Exercise the memory-only writer and reader without using the filesystem. */
     encoded = abmp_allocate_writer(&original.header);
     assert(encoded != NULL);
     assert(abmp_write_header(encoded, &original.header) == ABMP_OK);
@@ -84,6 +89,7 @@ static int test_file_round_trips(void)
     if (make_bitmap(&original) != 0)
         return 1;
 
+    /* Verify the streaming FILE* API independently of path-based wrappers. */
     file = tmpfile();
     assert(file != NULL);
     assert(abmp_file_write_file_p(file, &original) == ABMP_OK);
@@ -93,6 +99,7 @@ static int test_file_round_trips(void)
     fclose(file);
     abmp_free(&decoded);
 
+    /* Verify that the convenience path API preserves the same bitmap contents. */
     assert(abmp_write_file(ABMP_TEST_OUTPUT_PATH, &original) == ABMP_OK);
     memset(&decoded, 0, sizeof(decoded));
     assert(abmp_read_file(ABMP_TEST_OUTPUT_PATH, &decoded) == ABMP_OK);
@@ -110,19 +117,23 @@ static int test_error_handling(void)
     ABMP_BITMAP_HEADER header = {0};
     uint8_t buffer[ABMP_HEADER_SIZE] = {0};
 
+    /* A missing input path must return the documented error instead of succeeding. */
     assert(abmp_read_file("this-file-does-not-exist.bmp", &bitmap) == ABMP_FILE_NOT_EXIST);
 
     assert(abmp_create_bitmap(&bitmap, 1, 1) == ABMP_OK);
+    /* Reject a signature if either byte differs from the required "BM" marker. */
     header = bitmap.header;
     header.signature[1] = 'X';
     assert(abmp_write_header(buffer, &header) == ABMP_IS_NOT_BMP_FILE);
     memcpy(buffer, &header, sizeof(header));
     assert(abmp_read_header(buffer, &header) == ABMP_IS_NOT_BMP_FILE);
 
+    /* The pixel payload size must agree with dimensions and row padding. */
     header = bitmap.header;
     header.imagesize++;
     assert(abmp_write_header(buffer, &header) == ABMP_BMP_DATA_IS_CORRUPTED);
 
+    /* Unsupported compression and indexed-color formats fail explicitly. */
     bitmap.header.compression = 1;
     assert(abmp_read_data(buffer, &bitmap) == ABMP_COMPRESSION_IS_NOT_SUPPORTED);
     bitmap.header.compression = 0;
