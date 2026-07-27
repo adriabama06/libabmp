@@ -17,7 +17,7 @@ cmake --build build
 
 ### Run tests
 ```bash
-ctest --test-dir build --output-on-failure
+./scripts/run_tests.sh
 ```
 
 > **Note**: On Windows, ensure MinGW is installed and available in PATH. The library does not compile with MSVC (cl.exe) due to C language feature requirements.
