@@ -64,13 +64,16 @@ ABMP_ERRORS abmp_file_read_data(FILE* file, ABMP_BITMAP* bitmap)
     // Not enough memory
     if(bitmap->pixel_data == NULL) return ABMP_OUT_OF_MEMORY;
 
+    // TODO: Check fseek is ok + Check ftell will give a correct value of current position
     fseek(file, ftell(file) + bitmap->header.dataoffset, SEEK_SET);
 
+    // TODO: Check fread reads all the data correctly
     fread(bitmap->pixel_data, 1, bitmap->header.imagesize, file);
 
     return ABMP_OK;
 }
 
+// TODO: Check fseek movement if returns error or not
 ABMP_ERRORS abmp_file_read_file_p(FILE* file, ABMP_BITMAP* bitmap)
 {
     ABMP_ERRORS status;

@@ -52,6 +52,7 @@ ABMP_ERRORS abmp_file_write_data(FILE* file, ABMP_BITMAP* bitmap)
     return ABMP_OK;
 }
 
+// TODO: This function is not taking in account the header->dataoffset, so is writing an invalid file if header->dataoffset is different from ABMP_HEADER_SIZE
 ABMP_ERRORS abmp_file_write_file_p(FILE* file, ABMP_BITMAP* bitmap)
 {
     ABMP_ERRORS status;
@@ -59,6 +60,8 @@ ABMP_ERRORS abmp_file_write_file_p(FILE* file, ABMP_BITMAP* bitmap)
     status = abmp_file_write_header(file, &bitmap->header);
 
     if(status != ABMP_OK) return status;
+
+    // TODO: Here do the seek of dataoffset ^
 
     status = abmp_file_write_data(file, bitmap);
 
