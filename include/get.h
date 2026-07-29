@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-static inline uint32_t abmp_get_pixel_raw_position(ABMP_BITMAP_HEADER* header, uint32_t x, uint32_t y)
+static inline uint32_t abmp_get_pixel_raw_position(const ABMP_BITMAP_HEADER* header, uint32_t x, uint32_t y)
 {
     // Note: It starts from bottom left, it means:
     /* x=0, y=0:
@@ -68,7 +68,7 @@ In the bmp file is stored as:
 From left to right the order stills the same, but the image is flipped vertically.
 This function reverses the vertical order using (header.height - y)
 */
-static inline uint32_t abmp_get_pixel_position_from_top_left(ABMP_BITMAP_HEADER* header, uint32_t x, uint32_t y)
+static inline uint32_t abmp_get_pixel_position_from_top_left(const ABMP_BITMAP_HEADER* header, uint32_t x, uint32_t y)
 {
     // Note: It starts from top left, it means:
     /* x=0, y=0:

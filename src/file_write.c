@@ -1,6 +1,6 @@
 #include "abmp.h"
 
-ABMP_ERRORS abmp_write_header_to_file(FILE* file, ABMP_BITMAP_HEADER* header)
+ABMP_ERRORS abmp_write_header_to_file(FILE* file, const ABMP_BITMAP_HEADER* header)
 {
     if(file == NULL || header == NULL) return ABMP_INVALID_PARAMETERS;
 
@@ -47,7 +47,7 @@ ABMP_ERRORS abmp_write_header_to_file(FILE* file, ABMP_BITMAP_HEADER* header)
     return ABMP_OK;
 }
 
-ABMP_ERRORS abmp_write_pixeldata_to_file(FILE* file, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_write_pixeldata_to_file(FILE* file, const ABMP_BITMAP* bitmap)
 {
     if(file == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
 
@@ -57,7 +57,7 @@ ABMP_ERRORS abmp_write_pixeldata_to_file(FILE* file, ABMP_BITMAP* bitmap)
 }
 
 // TODO: This function is not taking in account the header->dataoffset, so is writing an invalid file if header->dataoffset is different from ABMP_HEADER_SIZE
-ABMP_ERRORS abmp_write_file_p_using_direct(FILE* file, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_write_file_p_using_direct(FILE* file, const ABMP_BITMAP* bitmap)
 {
     if(file == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
 
@@ -96,7 +96,7 @@ ABMP_ERRORS abmp_write_file_p_using_direct(FILE* file, ABMP_BITMAP* bitmap)
     return status;
 }
 
-ABMP_ERRORS abmp_write_filepath_using_direct(const char* path, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_write_filepath_using_direct(const char* path, const ABMP_BITMAP* bitmap)
 {
     if(path == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
 

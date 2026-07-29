@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-void abmp_print_header(ABMP_BITMAP_HEADER* header)
+void abmp_print_header(const ABMP_BITMAP_HEADER* header)
 {
     printf("signature: %c%c\n", header->signature[0], header->signature[1]);
     printf("filesize: %u\n", header->filesize);

@@ -1,7 +1,7 @@
 #include "abmp.h"
 
 // Reserve the total memory required by the output
-uint8_t* abmp_allocate_filedata(ABMP_BITMAP_HEADER* header)
+uint8_t* abmp_allocate_filedata(const ABMP_BITMAP_HEADER* header)
 {
     if(header == NULL) return NULL;
     return (uint8_t*) malloc(header->dataoffset + header->imagesize);
@@ -11,7 +11,7 @@ uint8_t* abmp_allocate_filedata(ABMP_BITMAP_HEADER* header)
  * @param data Data len must be >= ABMP_HEADER_SIZE (54)
  * @return It returns ABMP_OK (0) if ok, any other number means other errors
  */
-ABMP_ERRORS abmp_write_header_to_memory(uint8_t* data, ABMP_BITMAP_HEADER* header)
+ABMP_ERRORS abmp_write_header_to_memory(uint8_t* data, const ABMP_BITMAP_HEADER* header)
 {
     if(data == NULL || header == NULL) return ABMP_INVALID_PARAMETERS;
 
@@ -58,7 +58,7 @@ ABMP_ERRORS abmp_write_header_to_memory(uint8_t* data, ABMP_BITMAP_HEADER* heade
 /**
  * @param data Data must point at the start of the file (not any offset or end of header)
  */
-ABMP_ERRORS abmp_write_pixeldata_to_memory(uint8_t* data, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_write_pixeldata_to_memory(uint8_t* data, const ABMP_BITMAP* bitmap)
 {
     if(data == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
 
@@ -67,7 +67,7 @@ ABMP_ERRORS abmp_write_pixeldata_to_memory(uint8_t* data, ABMP_BITMAP* bitmap)
     return ABMP_OK;
 }
 
-ABMP_ERRORS abmp_write_file_p_using_memory(FILE* file, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_write_file_p_using_memory(FILE* file, const ABMP_BITMAP* bitmap)
 {
     if(file == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
 
@@ -105,7 +105,7 @@ ABMP_ERRORS abmp_write_file_p_using_memory(FILE* file, ABMP_BITMAP* bitmap)
     return status;
 }
 
-ABMP_ERRORS abmp_write_filepath_using_memory(const char* path, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_write_filepath_using_memory(const char* path, const ABMP_BITMAP* bitmap)
 {
     if(path == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
 

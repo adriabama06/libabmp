@@ -20,7 +20,7 @@ size_t _BMP_MEMORY_OFFSETS(size_t count)
  * @param data Data len must be >= ABMP_HEADER_SIZE (54)
  * @return It returns ABMP_OK (0) if ok, any other number means other errors
  */
-ABMP_ERRORS abmp_read_header_from_memory(uint8_t* data, ABMP_BITMAP_HEADER* header)
+ABMP_ERRORS abmp_read_header_from_memory(const uint8_t* data, ABMP_BITMAP_HEADER* header)
 {
     if(data == NULL || header == NULL) return ABMP_INVALID_PARAMETERS;
 
@@ -67,7 +67,7 @@ ABMP_ERRORS abmp_read_header_from_memory(uint8_t* data, ABMP_BITMAP_HEADER* head
 /**
  * @param data Data len must be >= ABMP_HEADER_SIZE + header.dataoffset + header.imagesize
  */
-ABMP_ERRORS abmp_read_pixeldata_from_memory(uint8_t* data, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_read_pixeldata_from_memory(const uint8_t* data, ABMP_BITMAP* bitmap)
 {
     if(data == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
 
