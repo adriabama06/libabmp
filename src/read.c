@@ -13,7 +13,8 @@ size_t __BMP_MEMORY_OFFSETS(size_t count)
 }
 
 /**
- * It returns 0 if ok, any other code means other errors
+ * @param data Data len must be >= ABMP_HEADER_SIZE (54)
+ * @return It returns ABMP_OK (0) if ok, any other number means other errors
  */
 ABMP_ERRORS abmp_read_header(uint8_t* data, ABMP_BITMAP_HEADER* header)
 {
@@ -57,6 +58,9 @@ ABMP_ERRORS abmp_read_header(uint8_t* data, ABMP_BITMAP_HEADER* header)
     return ABMP_OK;
 }
 
+/**
+ * @param data Data len must be >= ABMP_HEADER_SIZE + header.dataoffset + header.imagesize
+ */
 ABMP_ERRORS abmp_read_data(uint8_t* data, ABMP_BITMAP* bitmap)
 {
     if(bitmap->header.compression != 0)
@@ -81,6 +85,7 @@ ABMP_ERRORS abmp_read_data(uint8_t* data, ABMP_BITMAP* bitmap)
     return ABMP_OK;
 }
 
+// TODO: Check fseek + After reading the header check if the remain file is long enough for the imagesize
 ABMP_ERRORS abmp_read_file_p(FILE* file, ABMP_BITMAP* bitmap)
 {
     ABMP_ERRORS status;

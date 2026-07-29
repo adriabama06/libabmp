@@ -6,7 +6,8 @@ uint8_t* abmp_allocate_writer(ABMP_BITMAP_HEADER* header)
 }
 
 /**
- * It returns 0 if ok, any other code means other errors
+ * @param data Data len must be >= ABMP_HEADER_SIZE (54)
+ * @return It returns ABMP_OK (0) if ok, any other number means other errors
  */
 ABMP_ERRORS abmp_write_header(uint8_t* data, ABMP_BITMAP_HEADER* header)
 {
@@ -50,6 +51,8 @@ ABMP_ERRORS abmp_write_header(uint8_t* data, ABMP_BITMAP_HEADER* header)
     return ABMP_OK;
 }
 
+// TODO: In the writers check that the data is ok to copy, the values len match, etc, CHECK IF POINTERS ARE NULL
+// TODO: Be strict, think the worts case, invalid data, null pointers, etc
 ABMP_ERRORS abmp_write_data(uint8_t* data, ABMP_BITMAP* bitmap)
 {
     memcpy(data + bitmap->header.dataoffset, bitmap->pixel_data, bitmap->header.imagesize);

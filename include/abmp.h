@@ -48,6 +48,8 @@ typedef enum ABMP_ERRORS_E {
     ABMP_ERROR_OPENING_FILE
 } ABMP_ERRORS;
 
+// TODO: Rename the functions to be more clear on what are they doing
+
 /* WORKING ON MEMORY (memory -> memory | memory -> memory) */
 // Read
 ABMP_ERRORS abmp_read_header(uint8_t* data, ABMP_BITMAP_HEADER* header);
