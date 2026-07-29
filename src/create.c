@@ -43,6 +43,6 @@ ABMP_ERRORS abmp_create_bitmap(ABMP_BITMAP* bitmap, uint32_t width, uint32_t hei
 void abmp_free(ABMP_BITMAP* bitmap)
 {
     free(bitmap->pixel_data);
-    bitmap->pixel_data = NULL;
     memset(&bitmap->header, 0, sizeof(ABMP_BITMAP_HEADER));
+    bitmap->pixel_data = NULL;
 }

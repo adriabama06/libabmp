@@ -14,7 +14,7 @@ extern "C" {
 #define ABMP_HEADER_SIZE 54
 
 // defined in the first line of read.c
-static const unsigned long __BMP_MEMORY_SIZES[] = {
+static const size_t __BMP_MEMORY_SIZES[] = {
     sizeof(uint8_t) * 2,
     sizeof(uint32_t),
     sizeof(uint32_t),
@@ -32,7 +32,7 @@ static const unsigned long __BMP_MEMORY_SIZES[] = {
     sizeof(uint32_t)
 };
 
-size_t __BMP_MEMORY_OFFSETS(size_t count);
+size_t _BMP_MEMORY_OFFSETS(size_t count);
 
 typedef enum ABMP_ERRORS_E {
     ABMP_OK = 0,
@@ -48,7 +48,8 @@ typedef enum ABMP_ERRORS_E {
     ABMP_ERROR_OPENING_FILE,
     ABMP_INVALID_PARAMETERS,
     ABMP_ERROR_SEEKING_FILE,
-    ABMP_ERROR_FTELLING_FILE
+    ABMP_ERROR_FTELLING_FILE,
+    ABMP_FILE_IMAGESIZE_MISSMATCH
 } ABMP_ERRORS;
 
 /* WORKING ON MEMORY (memory -> memory | memory -> memory) */

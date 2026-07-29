@@ -3,6 +3,7 @@
 // Reserve the total memory required by the output
 uint8_t* abmp_allocate_filedata(ABMP_BITMAP_HEADER* header)
 {
+    if(header == NULL) return NULL;
     return (uint8_t*) malloc(header->dataoffset + header->imagesize);
 }
 
@@ -12,6 +13,8 @@ uint8_t* abmp_allocate_filedata(ABMP_BITMAP_HEADER* header)
  */
 ABMP_ERRORS abmp_write_header_to_memory(uint8_t* data, ABMP_BITMAP_HEADER* header)
 {
+    if(data == NULL || header == NULL) return ABMP_INVALID_PARAMETERS;
+
     if(header->signature[0] != 'B' || header->signature[1] != 'M')
     {
         // This is not a BMP file or it's corrupted. Let the user wipe by it self the header data.
@@ -32,30 +35,33 @@ ABMP_ERRORS abmp_write_header_to_memory(uint8_t* data, ABMP_BITMAP_HEADER* heade
     {
         size_t count = 0;
 
-        memcpy(data + __BMP_MEMORY_OFFSETS(count), &header->signature,        __BMP_MEMORY_SIZES[count++]);
-        memcpy(data + __BMP_MEMORY_OFFSETS(count), &header->filesize,         __BMP_MEMORY_SIZES[count++]);
-        memcpy(data + __BMP_MEMORY_OFFSETS(count), &header->reserved,         __BMP_MEMORY_SIZES[count++]);
-        memcpy(data + __BMP_MEMORY_OFFSETS(count), &header->dataoffset,       __BMP_MEMORY_SIZES[count++]);
-        memcpy(data + __BMP_MEMORY_OFFSETS(count), &header->size,             __BMP_MEMORY_SIZES[count++]);
-        memcpy(data + __BMP_MEMORY_OFFSETS(count), &header->width,            __BMP_MEMORY_SIZES[count++]);
-        memcpy(data + __BMP_MEMORY_OFFSETS(count), &header->height,           __BMP_MEMORY_SIZES[count++]);
-        memcpy(data + __BMP_MEMORY_OFFSETS(count), &header->planes,           __BMP_MEMORY_SIZES[count++]);
-        memcpy(data + __BMP_MEMORY_OFFSETS(count), &header->bits_per_pixel,   __BMP_MEMORY_SIZES[count++]);
-        memcpy(data + __BMP_MEMORY_OFFSETS(count), &header->compression,      __BMP_MEMORY_SIZES[count++]);
-        memcpy(data + __BMP_MEMORY_OFFSETS(count), &header->imagesize,        __BMP_MEMORY_SIZES[count++]);
-        memcpy(data + __BMP_MEMORY_OFFSETS(count), &header->y_pixels_per_m,   __BMP_MEMORY_SIZES[count++]);
-        memcpy(data + __BMP_MEMORY_OFFSETS(count), &header->x_pixels_per_m,   __BMP_MEMORY_SIZES[count++]);
-        memcpy(data + __BMP_MEMORY_OFFSETS(count), &header->colors_used,      __BMP_MEMORY_SIZES[count++]);
-        memcpy(data + __BMP_MEMORY_OFFSETS(count), &header->important_colors, __BMP_MEMORY_SIZES[count++]);
+        memcpy(data + _BMP_MEMORY_OFFSETS(count), &header->signature,        __BMP_MEMORY_SIZES[count++]);
+        memcpy(data + _BMP_MEMORY_OFFSETS(count), &header->filesize,         __BMP_MEMORY_SIZES[count++]);
+        memcpy(data + _BMP_MEMORY_OFFSETS(count), &header->reserved,         __BMP_MEMORY_SIZES[count++]);
+        memcpy(data + _BMP_MEMORY_OFFSETS(count), &header->dataoffset,       __BMP_MEMORY_SIZES[count++]);
+        memcpy(data + _BMP_MEMORY_OFFSETS(count), &header->size,             __BMP_MEMORY_SIZES[count++]);
+        memcpy(data + _BMP_MEMORY_OFFSETS(count), &header->width,            __BMP_MEMORY_SIZES[count++]);
+        memcpy(data + _BMP_MEMORY_OFFSETS(count), &header->height,           __BMP_MEMORY_SIZES[count++]);
+        memcpy(data + _BMP_MEMORY_OFFSETS(count), &header->planes,           __BMP_MEMORY_SIZES[count++]);
+        memcpy(data + _BMP_MEMORY_OFFSETS(count), &header->bits_per_pixel,   __BMP_MEMORY_SIZES[count++]);
+        memcpy(data + _BMP_MEMORY_OFFSETS(count), &header->compression,      __BMP_MEMORY_SIZES[count++]);
+        memcpy(data + _BMP_MEMORY_OFFSETS(count), &header->imagesize,        __BMP_MEMORY_SIZES[count++]);
+        memcpy(data + _BMP_MEMORY_OFFSETS(count), &header->y_pixels_per_m,   __BMP_MEMORY_SIZES[count++]);
+        memcpy(data + _BMP_MEMORY_OFFSETS(count), &header->x_pixels_per_m,   __BMP_MEMORY_SIZES[count++]);
+        memcpy(data + _BMP_MEMORY_OFFSETS(count), &header->colors_used,      __BMP_MEMORY_SIZES[count++]);
+        memcpy(data + _BMP_MEMORY_OFFSETS(count), &header->important_colors, __BMP_MEMORY_SIZES[count++]);
     }
 
     return ABMP_OK;
 }
 
-// TODO: In the writers check that the data is ok to copy, the values len match, etc, CHECK IF POINTERS ARE NULL
-// TODO: Be strict, think the worts case, invalid data, null pointers, etc
+/**
+ * @param data Data must point at the start of the file (not any offset or end of header)
+ */
 ABMP_ERRORS abmp_write_pixeldata_to_memory(uint8_t* data, ABMP_BITMAP* bitmap)
 {
+    if(data == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
+
     memcpy(data + bitmap->header.dataoffset, bitmap->pixel_data, bitmap->header.imagesize);
 
     return ABMP_OK;
@@ -63,6 +69,8 @@ ABMP_ERRORS abmp_write_pixeldata_to_memory(uint8_t* data, ABMP_BITMAP* bitmap)
 
 ABMP_ERRORS abmp_write_file_p_using_memory(FILE* file, ABMP_BITMAP* bitmap)
 {
+    if(file == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
+
     ABMP_ERRORS status;
 
     uint8_t* file_data = abmp_allocate_filedata(&bitmap->header);
@@ -99,6 +107,8 @@ ABMP_ERRORS abmp_write_file_p_using_memory(FILE* file, ABMP_BITMAP* bitmap)
 
 ABMP_ERRORS abmp_write_filepath_using_memory(const char* path, ABMP_BITMAP* bitmap)
 {
+    if(path == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
+
     // Open file
     FILE* file = fopen(path, "wb");
 

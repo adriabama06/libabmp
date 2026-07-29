@@ -81,10 +81,10 @@ ABMP_ERRORS abmp_write_file_p_using_direct(FILE* file, ABMP_BITMAP* bitmap)
     if(current_pos - file_start != ABMP_HEADER_SIZE) return ABMP_ERROR_WRITING_FILE;
 
     // Manually fill zeros
-    if(current_pos - file_start > ABMP_HEADER_SIZE)
+    if(bitmap->header.dataoffset > ABMP_HEADER_SIZE)
     {
         uint8_t zero = 0;
-        size_t padding = (current_pos - file_start) - ABMP_HEADER_SIZE;
+        size_t padding = bitmap->header.dataoffset - ABMP_HEADER_SIZE;
         for (size_t i = 0; i < padding; i++)
         {
             if(fwrite(&zero, 1, sizeof(uint8_t), file) != sizeof(uint8_t)) return ABMP_ERROR_WRITING_FILE;

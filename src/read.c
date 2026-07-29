@@ -1,7 +1,11 @@
 #include "abmp.h"
 
-size_t __BMP_MEMORY_OFFSETS(size_t count)
+size_t _BMP_MEMORY_OFFSETS(size_t count)
 {
+    if(count > sizeof(__BMP_MEMORY_SIZES)/sizeof(__BMP_MEMORY_SIZES[0])) {
+        count = sizeof(__BMP_MEMORY_SIZES)/sizeof(__BMP_MEMORY_SIZES[0]);
+    }
+
     size_t offset = 0;
 
     for (size_t i = 1; i < count; i++)
@@ -18,6 +22,8 @@ size_t __BMP_MEMORY_OFFSETS(size_t count)
  */
 ABMP_ERRORS abmp_read_header_from_memory(uint8_t* data, ABMP_BITMAP_HEADER* header)
 {
+    if(data == NULL || header == NULL) return ABMP_INVALID_PARAMETERS;
+
     if(sizeof(ABMP_BITMAP_HEADER) == ABMP_HEADER_SIZE) 
     {
         memcpy(header, data, sizeof(ABMP_BITMAP_HEADER));
@@ -26,21 +32,21 @@ ABMP_ERRORS abmp_read_header_from_memory(uint8_t* data, ABMP_BITMAP_HEADER* head
     {
         size_t count = 0;
 
-        memcpy(&header->signature,        data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->filesize,         data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->reserved,         data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->dataoffset,       data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->size,             data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->width,            data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->height,           data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->planes,           data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->bits_per_pixel,   data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->compression,      data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->imagesize,        data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->y_pixels_per_m,   data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->x_pixels_per_m,   data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->colors_used,      data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->important_colors, data + __BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header->signature,        data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header->filesize,         data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header->reserved,         data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header->dataoffset,       data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header->size,             data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header->width,            data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header->height,           data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header->planes,           data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header->bits_per_pixel,   data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header->compression,      data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header->imagesize,        data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header->y_pixels_per_m,   data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header->x_pixels_per_m,   data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header->colors_used,      data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+        memcpy(&header->important_colors, data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
     }
 
     if(header->signature[0] != 'B' || header->signature[1] != 'M')
@@ -63,6 +69,8 @@ ABMP_ERRORS abmp_read_header_from_memory(uint8_t* data, ABMP_BITMAP_HEADER* head
  */
 ABMP_ERRORS abmp_read_pixeldata_from_memory(uint8_t* data, ABMP_BITMAP* bitmap)
 {
+    if(data == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
+
     if(bitmap->header.compression != 0)
     {
         // Has compression
@@ -88,14 +96,22 @@ ABMP_ERRORS abmp_read_pixeldata_from_memory(uint8_t* data, ABMP_BITMAP* bitmap)
 // TODO: Check fseek + After reading the header check if the remain file is long enough for the imagesize
 ABMP_ERRORS abmp_read_file_p_using_memory(FILE* file, ABMP_BITMAP* bitmap)
 {
+    if(file == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
+
     ABMP_ERRORS status;
 
     long file_start = ftell(file);
 
-    // Get the file size
-    fseek(file, 0, SEEK_END);
+    if(file_start == -1) return ABMP_ERROR_FTELLING_FILE;
 
-    long file_size = ftell(file) - file_start;
+    // Move to the end to get the file size
+    if(fseek(file, 0, SEEK_END) != 0) return ABMP_ERROR_SEEKING_FILE;
+
+    long file_end = ftell(file);
+
+    if(file_end < file_start) return ABMP_ERROR_FTELLING_FILE;
+
+    long file_size = file_end - file_start;
 
     if(file_size < ABMP_HEADER_SIZE) return ABMP_FILE_SIZE_IS_LOWER_THAN_HEADER_SIZE;
 
@@ -104,7 +120,10 @@ ABMP_ERRORS abmp_read_file_p_using_memory(FILE* file, ABMP_BITMAP* bitmap)
 
     if(file_data == NULL) return ABMP_OUT_OF_MEMORY;
 
-    fseek(file, file_start, SEEK_SET);
+    if(fseek(file, file_start, SEEK_SET) != 0) {
+        free(file_data);
+        return ABMP_ERROR_SEEKING_FILE;
+    }
 
     size_t f_status = fread(file_data, sizeof(uint8_t), file_size, file);
 
@@ -123,6 +142,12 @@ ABMP_ERRORS abmp_read_file_p_using_memory(FILE* file, ABMP_BITMAP* bitmap)
         return status;
     }
 
+    if(file_size - bitmap->header.dataoffset < bitmap->header.imagesize)
+    {
+        free(file_data);
+        return ABMP_FILE_IMAGESIZE_MISSMATCH;
+    }
+
     status = abmp_read_pixeldata_from_memory(file_data, bitmap);
 
     free(file_data);
@@ -132,6 +157,8 @@ ABMP_ERRORS abmp_read_file_p_using_memory(FILE* file, ABMP_BITMAP* bitmap)
 
 ABMP_ERRORS abmp_read_filepath_using_memory(const char* path, ABMP_BITMAP* bitmap)
 {
+    if(path == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
+
     // Open file
     FILE* file = fopen(path, "rb");
 
