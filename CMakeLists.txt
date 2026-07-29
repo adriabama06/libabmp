@@ -37,6 +37,7 @@ if(BUILD_TESTING)
         test_errors
         test_errors_leak
         test_fuzz
+        test_makebuffer
     )
 
     foreach(test_suite ${TEST_SUITES})
