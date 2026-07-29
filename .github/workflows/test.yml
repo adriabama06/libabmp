@@ -10,6 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y cmake build-essential
+        run: sudo apt-get update && sudo apt-get install -y cmake build-essential valgrind
       - name: Run tests
         run: ./scripts/run_tests.sh
+      - name: Run tests with valgrind
+        run: ./scripts/run_tests.sh --valgrind
