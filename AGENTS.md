@@ -35,6 +35,8 @@ The script uses `BUILD_DIR` env var if set, defaults to `./build`.
 | `src/create.c` | `abmp_create_bitmap`, `abmp_free` |
 | `src/read.c` / `src/write.c` | Memory-to-memory serialization |
 | `src/file_read.c` / `src/file_write.c` | FILE*-based and filepath-based APIs |
+| `src/header.c` | `abmp_check_header` — signature + imagesize validation |
+| `src/abmp.c` | `abmp_print_header` — debug print utility |
 | `tests/test_common.h` | Shared helpers: `make_bitmap()`, `check_bitmap_equal()` |
 
 ### API naming conventions
@@ -42,10 +44,6 @@ The script uses `BUILD_DIR` env var if set, defaults to `./build`.
 Two flavors for file I/O:
 - `abmp_*_using_memory()` — reads entire file into a buffer, then parses
 - `abmp_*_using_direct()` — operates directly on FILE* / filepath
-
-### Known issue
-
-`abmp_makebuffer()` in `abmp.h:94` has a bug: the `buffer` parameter is passed by value, so the caller's pointer is never updated. Also `abmp_allocate_filedata` returns NULL on failure but line 101 checks `if(buffer)` (inverted logic).
 
 ## Testing conventions
 
