@@ -2,6 +2,8 @@
 
 A lightweight C library for reading and writing BMP files, implemented from scratch without external dependencies.
 
+> Now also in Rust: https://github.com/adriabama06/libabmp-rs
+
 ## Features
 - Supports only 24-bit BMP formats
 - Pure C implementation (no external libraries)
