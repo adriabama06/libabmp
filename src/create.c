@@ -1,5 +1,13 @@
 #include "abmp.h"
 
+
+/**
+ * @example
+ * ABMP_BITMAP bitmap;
+ * ABMP_ERRORS status = abmp_create_bitmap(&bitmap, 6, 4);
+ * if(status != ABMP_OK) return "Oh no...";
+ * abmp_free(&bitmap);
+ */
 ABMP_ERRORS abmp_create_bitmap(ABMP_BITMAP* bitmap, uint32_t width, uint32_t height)
 {
     memset(&bitmap->header, 0, sizeof(ABMP_BITMAP_HEADER));
@@ -30,4 +38,11 @@ ABMP_ERRORS abmp_create_bitmap(ABMP_BITMAP* bitmap, uint32_t width, uint32_t hei
     memset(bitmap->pixel_data, 255, bitmap->header.imagesize * sizeof(uint8_t));
 
     return ABMP_OK;
+}
+
+void abmp_free(ABMP_BITMAP* bitmap)
+{
+    free(bitmap->pixel_data);
+    bitmap->pixel_data = NULL;
+    memset(&bitmap->header, 0, sizeof(ABMP_BITMAP_HEADER));
 }

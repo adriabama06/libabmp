@@ -48,40 +48,51 @@ typedef enum ABMP_ERRORS_E {
     ABMP_ERROR_OPENING_FILE
 } ABMP_ERRORS;
 
-// TODO: Rename the functions to be more clear on what are they doing
-
 /* WORKING ON MEMORY (memory -> memory | memory -> memory) */
 // Read
-ABMP_ERRORS abmp_read_header(uint8_t* data, ABMP_BITMAP_HEADER* header);
-ABMP_ERRORS abmp_read_data(uint8_t* data, ABMP_BITMAP* bitmap);
-ABMP_ERRORS abmp_read_file_p(FILE* file, ABMP_BITMAP* bitmap);
-ABMP_ERRORS abmp_read_file(char* path, ABMP_BITMAP* bitmap);
-void abmp_free(ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_read_header_from_memory(uint8_t* data, ABMP_BITMAP_HEADER* header);
+ABMP_ERRORS abmp_read_pixeldata_from_memory(uint8_t* data, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_read_file_p_using_memory(FILE* file, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_read_filepath_using_memory(char* path, ABMP_BITMAP* bitmap);
 
 // Write
-uint8_t* abmp_allocate_writer(ABMP_BITMAP_HEADER* header);
-ABMP_ERRORS abmp_write_header(uint8_t* data, ABMP_BITMAP_HEADER* header);
-ABMP_ERRORS abmp_write_data(uint8_t* data, ABMP_BITMAP* bitmap);
-ABMP_ERRORS abmp_write_file_p(FILE* file, ABMP_BITMAP* bitmap);
-ABMP_ERRORS abmp_write_file(char* path, ABMP_BITMAP* bitmap);
+uint8_t* abmp_allocate_filedata(ABMP_BITMAP_HEADER* header);
+ABMP_ERRORS abmp_write_header_to_memory(uint8_t* data, ABMP_BITMAP_HEADER* header);
+ABMP_ERRORS abmp_write_pixeldata_to_memory(uint8_t* data, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_write_file_p_using_memory(FILE* file, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_write_filepath_using_memory(char* path, ABMP_BITMAP* bitmap);
 
 /* WORKING DIRECTLY FROM A FILE (file -> memory | memory -> file) */
 // Read
-ABMP_ERRORS abmp_file_read_header(FILE* file, ABMP_BITMAP_HEADER* header);
-ABMP_ERRORS abmp_file_read_data(FILE* file, ABMP_BITMAP* bitmap);
-ABMP_ERRORS abmp_file_read_file_p(FILE* file, ABMP_BITMAP* bitmap);
-ABMP_ERRORS abmp_file_read_file(char* path, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_read_header_from_file(FILE* file, ABMP_BITMAP_HEADER* header);
+ABMP_ERRORS abmp_read_pixeldata_from_file(FILE* file, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_read_file_p_using_direct(FILE* file, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_read_filepath_using_direct(char* path, ABMP_BITMAP* bitmap);
 
 // Write
-ABMP_ERRORS abmp_file_write_header(FILE* file, ABMP_BITMAP_HEADER* header);
-ABMP_ERRORS abmp_file_write_data(FILE* file, ABMP_BITMAP* bitmap);
-ABMP_ERRORS abmp_file_write_file_p(FILE* file, ABMP_BITMAP* bitmap);
-ABMP_ERRORS abmp_file_write_file(char* path, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_write_header_to_file(FILE* file, ABMP_BITMAP_HEADER* header);
+ABMP_ERRORS abmp_write_pixeldata_to_file(FILE* file, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_write_file_p_using_direct(FILE* file, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_write_filepath_using_direct(char* path, ABMP_BITMAP* bitmap);
+
+// TODO: Add tests for abmp_openfile & abmp_savefile
+
+/* User helpers */
+inline ABMP_ERRORS abmp_openfile(char* filepath, ABMP_BITMAP* bitmap) {
+    return abmp_read_filepath_using_direct(filepath, bitmap);
+}
+
+inline ABMP_ERRORS abmp_savefile(char* filepath, ABMP_BITMAP* bitmap) {
+    return abmp_write_filepath_using_direct(filepath, bitmap);
+}
 
 /* Bitmap helpers */
 #include "get.h"
-ABMP_ERRORS abmp_create_bitmap(ABMP_BITMAP* bitmap, uint32_t width, uint32_t height);
+#include "draw.h"
+
 void abmp_print_header(ABMP_BITMAP_HEADER* header);
+ABMP_ERRORS abmp_create_bitmap(ABMP_BITMAP* bitmap, uint32_t width, uint32_t height);
+void abmp_free(ABMP_BITMAP* bitmap);
 
 #ifdef __cplusplus
 }

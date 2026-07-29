@@ -1,6 +1,7 @@
 #include "abmp.h"
 
-uint8_t* abmp_allocate_writer(ABMP_BITMAP_HEADER* header)
+// Reserve the total memory required by the output
+uint8_t* abmp_allocate_filedata(ABMP_BITMAP_HEADER* header)
 {
     return (uint8_t*) malloc(header->dataoffset + header->imagesize);
 }
@@ -9,7 +10,7 @@ uint8_t* abmp_allocate_writer(ABMP_BITMAP_HEADER* header)
  * @param data Data len must be >= ABMP_HEADER_SIZE (54)
  * @return It returns ABMP_OK (0) if ok, any other number means other errors
  */
-ABMP_ERRORS abmp_write_header(uint8_t* data, ABMP_BITMAP_HEADER* header)
+ABMP_ERRORS abmp_write_header_to_memory(uint8_t* data, ABMP_BITMAP_HEADER* header)
 {
     if(header->signature[0] != 'B' || header->signature[1] != 'M')
     {
@@ -53,22 +54,22 @@ ABMP_ERRORS abmp_write_header(uint8_t* data, ABMP_BITMAP_HEADER* header)
 
 // TODO: In the writers check that the data is ok to copy, the values len match, etc, CHECK IF POINTERS ARE NULL
 // TODO: Be strict, think the worts case, invalid data, null pointers, etc
-ABMP_ERRORS abmp_write_data(uint8_t* data, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_write_pixeldata_to_memory(uint8_t* data, ABMP_BITMAP* bitmap)
 {
     memcpy(data + bitmap->header.dataoffset, bitmap->pixel_data, bitmap->header.imagesize);
 
     return ABMP_OK;
 }
 
-ABMP_ERRORS abmp_write_file_p(FILE* file, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_write_file_p_using_memory(FILE* file, ABMP_BITMAP* bitmap)
 {
     ABMP_ERRORS status;
 
-    uint8_t* file_data = abmp_allocate_writer(&bitmap->header);
+    uint8_t* file_data = abmp_allocate_filedata(&bitmap->header);
 
     if(file_data == NULL) return ABMP_OUT_OF_MEMORY;
 
-    status = abmp_write_header(file_data, &bitmap->header);
+    status = abmp_write_header_to_memory(file_data, &bitmap->header);
 
     if(status != ABMP_OK)
     {
@@ -76,7 +77,7 @@ ABMP_ERRORS abmp_write_file_p(FILE* file, ABMP_BITMAP* bitmap)
         return status;
     }
 
-    status = abmp_write_data(file_data, bitmap);
+    status = abmp_write_pixeldata_to_memory(file_data, bitmap);
 
     if(status != ABMP_OK)
     {
@@ -96,14 +97,14 @@ ABMP_ERRORS abmp_write_file_p(FILE* file, ABMP_BITMAP* bitmap)
     return status;
 }
 
-ABMP_ERRORS abmp_write_file(char* path, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_write_filepath_using_memory(char* path, ABMP_BITMAP* bitmap)
 {
     // Open file
     FILE* file = fopen(path, "wb");
 
     if(file == NULL) return ABMP_ERROR_OPENING_FILE;
 
-    ABMP_ERRORS status = abmp_write_file_p(file, bitmap);
+    ABMP_ERRORS status = abmp_write_file_p_using_memory(file, bitmap);
 
     fclose(file);
 

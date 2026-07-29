@@ -1,6 +1,6 @@
 #include "abmp.h"
 
-ABMP_ERRORS abmp_file_read_header(FILE* file, ABMP_BITMAP_HEADER* header)
+ABMP_ERRORS abmp_read_header_from_file(FILE* file, ABMP_BITMAP_HEADER* header)
 {
     if(sizeof(ABMP_BITMAP_HEADER) == ABMP_HEADER_SIZE) 
     {
@@ -45,7 +45,7 @@ ABMP_ERRORS abmp_file_read_header(FILE* file, ABMP_BITMAP_HEADER* header)
     return ABMP_OK;
 }
 
-ABMP_ERRORS abmp_file_read_data(FILE* file, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_read_pixeldata_from_file(FILE* file, ABMP_BITMAP* bitmap)
 {
     if(bitmap->header.compression != 0)
     {
@@ -74,7 +74,7 @@ ABMP_ERRORS abmp_file_read_data(FILE* file, ABMP_BITMAP* bitmap)
 }
 
 // TODO: Check fseek movement if returns error or not
-ABMP_ERRORS abmp_file_read_file_p(FILE* file, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_read_file_p_using_direct(FILE* file, ABMP_BITMAP* bitmap)
 {
     ABMP_ERRORS status;
 
@@ -90,26 +90,26 @@ ABMP_ERRORS abmp_file_read_file_p(FILE* file, ABMP_BITMAP* bitmap)
     fseek(file, file_start, SEEK_SET);
 
     // Read header & pixel_data
-    status = abmp_file_read_header(file, &bitmap->header);
+    status = abmp_read_header_from_file(file, &bitmap->header);
 
     if(status != ABMP_OK) return status;
 
     // Reset position
     fseek(file, file_start, SEEK_SET);
 
-    status = abmp_file_read_data(file, bitmap);
+    status = abmp_read_pixeldata_from_file(file, bitmap);
 
     return status;
 }
 
-ABMP_ERRORS abmp_file_read_file(char* path, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_read_filepath_using_direct(char* path, ABMP_BITMAP* bitmap)
 {
     // Open file
     FILE* file = fopen(path, "rb");
 
     if(file == NULL) return ABMP_FILE_NOT_EXIST;
 
-    ABMP_ERRORS status = abmp_file_read_file_p(file, bitmap);
+    ABMP_ERRORS status = abmp_read_file_p_using_direct(file, bitmap);
 
     fclose(file);
 

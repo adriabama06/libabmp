@@ -1,6 +1,6 @@
 #include "abmp.h"
 
-ABMP_ERRORS abmp_file_write_header(FILE* file, ABMP_BITMAP_HEADER* header)
+ABMP_ERRORS abmp_write_header_to_file(FILE* file, ABMP_BITMAP_HEADER* header)
 {
     if(header->signature[0] != 'B' || header->signature[1] != 'M')
     {
@@ -45,7 +45,7 @@ ABMP_ERRORS abmp_file_write_header(FILE* file, ABMP_BITMAP_HEADER* header)
     return ABMP_OK;
 }
 
-ABMP_ERRORS abmp_file_write_data(FILE* file, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_write_pixeldata_to_file(FILE* file, ABMP_BITMAP* bitmap)
 {
     if(fwrite(bitmap->pixel_data, 1, bitmap->header.imagesize, file) != bitmap->header.imagesize) return ABMP_ERROR_WRITING_FILE;
 
@@ -53,29 +53,29 @@ ABMP_ERRORS abmp_file_write_data(FILE* file, ABMP_BITMAP* bitmap)
 }
 
 // TODO: This function is not taking in account the header->dataoffset, so is writing an invalid file if header->dataoffset is different from ABMP_HEADER_SIZE
-ABMP_ERRORS abmp_file_write_file_p(FILE* file, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_write_file_p_using_direct(FILE* file, ABMP_BITMAP* bitmap)
 {
     ABMP_ERRORS status;
 
-    status = abmp_file_write_header(file, &bitmap->header);
+    status = abmp_write_header_to_file(file, &bitmap->header);
 
     if(status != ABMP_OK) return status;
 
     // TODO: Here do the seek of dataoffset ^
 
-    status = abmp_file_write_data(file, bitmap);
+    status = abmp_write_pixeldata_to_file(file, bitmap);
 
     return status;
 }
 
-ABMP_ERRORS abmp_file_write_file(char* path, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_write_filepath_using_direct(char* path, ABMP_BITMAP* bitmap)
 {
     // Open file
     FILE* file = fopen(path, "wb");
 
     if(file == NULL) return ABMP_ERROR_OPENING_FILE;
 
-    ABMP_ERRORS status = abmp_file_write_file_p(file, bitmap);
+    ABMP_ERRORS status = abmp_write_file_p_using_direct(file, bitmap);
 
     fclose(file);
 

@@ -33,7 +33,7 @@ void abmp_hello(void) {
 
     ABMP_BITMAP_HEADER header;
     
-    size_t status = abmp_read_header(data, &header);
+    size_t status = abmp_read_header_from_memory(data, &header);
     int padding = header.width % 4;
 
     printf("%d: %dx%dx3+%dx%d =? %d\n", status, header.width, header.height, padding, header.height, header.imagesize);
@@ -42,7 +42,7 @@ void abmp_hello(void) {
 
     bmp.header = header; // or directly create ^^^ bmp and pass to abmp_read_header(data, &bmp.header);
     
-    status = abmp_read_data(data, &bmp);
+    status = abmp_read_pixeldata_from_memory(data, &bmp);
 
     free(data);
     fclose(f);
@@ -115,7 +115,7 @@ void abmp_hello2(void)
 
     ABMP_BITMAP bitmap;
 
-    size_t status = abmp_read_file(path, &bitmap);
+    size_t status = abmp_read_filepath_using_memory(path, &bitmap);
 
     printf("Reading %s status: %d\n", path, status);
 
@@ -192,7 +192,7 @@ void abmp_hello3(void)
 
     ABMP_BITMAP bitmap;
 
-    size_t status = abmp_read_file_p(file, &bitmap);
+    size_t status = abmp_read_file_p_using_memory(file, &bitmap);
 
     fclose(file);
 
@@ -272,7 +272,7 @@ void abmp_hello4(void)
 
     ABMP_BITMAP bitmap;
 
-    status = abmp_read_file(input_path, &bitmap);
+    status = abmp_read_filepath_using_memory(input_path, &bitmap);
 
     printf("status = %d\n", status);
 
@@ -291,7 +291,7 @@ void abmp_hello4(void)
         bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 1],
         bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2)]);
 
-    status = abmp_write_file(output_path, &bitmap);
+    status = abmp_write_filepath_using_memory(output_path, &bitmap);
 
     printf("status = %d\n", status);
 
@@ -311,7 +311,7 @@ void abmp_hello5(void)
 
     ABMP_BITMAP bitmap;
 
-    status = abmp_file_read_file(input_path, &bitmap);
+    status = abmp_read_filepath_using_direct(input_path, &bitmap);
 
     abmp_print_header(&bitmap.header);
 
@@ -332,7 +332,7 @@ void abmp_hello5(void)
         bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 1],
         bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2)]);
 
-    status = abmp_file_write_file(output_path, &bitmap);
+    status = abmp_write_filepath_using_direct(output_path, &bitmap);
 
     printf("status = %d\n", status);
 
@@ -373,7 +373,7 @@ void abmp_hello6(void)
         bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 1],
         bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2)]);
 
-    status = abmp_file_write_file(output_path, &bitmap);
+    status = abmp_write_filepath_using_direct(output_path, &bitmap);
 
     printf("status = %d\n", status);
 

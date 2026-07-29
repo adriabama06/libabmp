@@ -80,12 +80,12 @@ static int test_memory_round_trip(void)
         return 1;
 
     /* Exercise the memory-only writer and reader without using the filesystem. */
-    encoded = abmp_allocate_writer(&original.header);
+    encoded = abmp_allocate_filedata(&original.header);
     assert(encoded != NULL);
-    assert(abmp_write_header(encoded, &original.header) == ABMP_OK);
-    assert(abmp_write_data(encoded, &original) == ABMP_OK);
-    assert(abmp_read_header(encoded, &decoded.header) == ABMP_OK);
-    assert(abmp_read_data(encoded, &decoded) == ABMP_OK);
+    assert(abmp_write_header_to_memory(encoded, &original.header) == ABMP_OK);
+    assert(abmp_write_pixeldata_to_memory(encoded, &original) == ABMP_OK);
+    assert(abmp_read_header_from_memory(encoded, &decoded.header) == ABMP_OK);
+    assert(abmp_read_pixeldata_from_memory(encoded, &decoded) == ABMP_OK);
     assert(check_bitmap_equal(&original, &decoded) == 0);
 
     free(encoded);
@@ -111,17 +111,17 @@ static int test_file_round_trips(void)
     /* Verify the streaming FILE* API independently of path-based wrappers. */
     file = tmpfile();
     assert(file != NULL);
-    assert(abmp_file_write_file_p(file, &original) == ABMP_OK);
+    assert(abmp_write_file_p_using_direct(file, &original) == ABMP_OK);
     rewind(file);
-    assert(abmp_file_read_file_p(file, &decoded) == ABMP_OK);
+    assert(abmp_read_file_p_using_direct(file, &decoded) == ABMP_OK);
     assert(check_bitmap_equal(&original, &decoded) == 0);
     fclose(file);
     abmp_free(&decoded);
 
     /* Verify that the convenience path API preserves the same bitmap contents. */
-    assert(abmp_write_file(ABMP_TEST_OUTPUT_PATH, &original) == ABMP_OK);
+    assert(abmp_write_filepath_using_memory(ABMP_TEST_OUTPUT_PATH, &original) == ABMP_OK);
     memset(&decoded, 0, sizeof(decoded));
-    assert(abmp_read_file(ABMP_TEST_OUTPUT_PATH, &decoded) == ABMP_OK);
+    assert(abmp_read_filepath_using_memory(ABMP_TEST_OUTPUT_PATH, &decoded) == ABMP_OK);
     assert(check_bitmap_equal(&original, &decoded) == 0);
     remove(ABMP_TEST_OUTPUT_PATH);
 
@@ -141,27 +141,27 @@ static int test_error_handling(void)
     uint8_t buffer[ABMP_HEADER_SIZE] = {0};
 
     /* A missing input path must return the documented error instead of succeeding. */
-    assert(abmp_read_file("this-file-does-not-exist.bmp", &bitmap) == ABMP_FILE_NOT_EXIST);
+    assert(abmp_read_filepath_using_memory("this-file-does-not-exist.bmp", &bitmap) == ABMP_FILE_NOT_EXIST);
 
     assert(abmp_create_bitmap(&bitmap, 1, 1) == ABMP_OK);
     /* Reject a signature if either byte differs from the required "BM" marker. */
     header = bitmap.header;
     header.signature[1] = 'X';
-    assert(abmp_write_header(buffer, &header) == ABMP_IS_NOT_BMP_FILE);
+    assert(abmp_write_header_to_memory(buffer, &header) == ABMP_IS_NOT_BMP_FILE);
     memcpy(buffer, &header, sizeof(header));
-    assert(abmp_read_header(buffer, &header) == ABMP_IS_NOT_BMP_FILE);
+    assert(abmp_read_header_from_memory(buffer, &header) == ABMP_IS_NOT_BMP_FILE);
 
     /* The pixel payload size must agree with dimensions and row padding. */
     header = bitmap.header;
     header.imagesize++;
-    assert(abmp_write_header(buffer, &header) == ABMP_BMP_DATA_IS_CORRUPTED);
+    assert(abmp_write_header_to_memory(buffer, &header) == ABMP_BMP_DATA_IS_CORRUPTED);
 
     /* Unsupported compression and indexed-color formats fail explicitly. */
     bitmap.header.compression = 1;
-    assert(abmp_read_data(buffer, &bitmap) == ABMP_COMPRESSION_IS_NOT_SUPPORTED);
+    assert(abmp_read_pixeldata_from_memory(buffer, &bitmap) == ABMP_COMPRESSION_IS_NOT_SUPPORTED);
     bitmap.header.compression = 0;
     bitmap.header.bits_per_pixel = 8;
-    assert(abmp_read_data(buffer, &bitmap) == ABMP_LOW_BITS_PER_PIXEL_IS_NOT_SUPPORTED);
+    assert(abmp_read_pixeldata_from_memory(buffer, &bitmap) == ABMP_LOW_BITS_PER_PIXEL_IS_NOT_SUPPORTED);
 
     abmp_free(&bitmap);
     return 0;
@@ -212,7 +212,7 @@ static int test_read_header_and_data_from_memory_buffer(void)
 
     /* Parse the BMP header into bitmap.header so abmp_read_data can use it
      * to locate the pixel data and allocate the right buffer size. */
-    assert(abmp_read_header(buffer, &bitmap.header) == ABMP_OK);
+    assert(abmp_read_header_from_memory(buffer, &bitmap.header) == ABMP_OK);
     assert(bitmap.header.signature[0] == 'B');
     assert(bitmap.header.signature[1] == 'M');
     assert(bitmap.header.width == 6);
@@ -226,7 +226,7 @@ static int test_read_header_and_data_from_memory_buffer(void)
     assert(padding == 2);
 
     /* Parse the full bitmap (header + pixel data). */
-    assert(abmp_read_data(buffer, &bitmap) == ABMP_OK);
+    assert(abmp_read_pixeldata_from_memory(buffer, &bitmap) == ABMP_OK);
     free(buffer);
 
     /* Pixel (0,0) in top-left coordinates is the top-left pixel.
@@ -264,7 +264,7 @@ static int test_read_bitmap_from_file(void)
 
     /* abmp_read_file opens the file, reads header + data, and fills the
      * ABMP_BITMAP structure in one call. */
-    assert(abmp_read_file(ABMP_TEST_SAMPLE_PATH, &bitmap) == ABMP_OK);
+    assert(abmp_read_filepath_using_memory(ABMP_TEST_SAMPLE_PATH, &bitmap) == ABMP_OK);
     assert(bitmap.header.signature[0] == 'B');
     assert(bitmap.header.signature[1] == 'M');
     assert(bitmap.header.width == 6);
@@ -303,7 +303,7 @@ static int test_read_bitmap_from_file_stream(void)
     assert(file != NULL);
 
     /* abmp_read_file_p reads header and pixel data from the open FILE*. */
-    assert(abmp_read_file_p(file, &bitmap) == ABMP_OK);
+    assert(abmp_read_file_p_using_memory(file, &bitmap) == ABMP_OK);
     fclose(file);
 
     assert(bitmap.header.signature[0] == 'B');
@@ -336,7 +336,7 @@ static int test_write_modified_pixel_yellow(void)
     ABMP_BITMAP bitmap = {0};
     ABMP_ERRORS status;
 
-    status = abmp_read_file(ABMP_TEST_SAMPLE_PATH, &bitmap);
+    status = abmp_read_filepath_using_memory(ABMP_TEST_SAMPLE_PATH, &bitmap);
     assert(status == ABMP_OK);
 
     /* Pixel (2,2) is currently white: BGR(255,255,255). */
@@ -355,11 +355,11 @@ static int test_write_modified_pixel_yellow(void)
     assert(bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 2] == 255);
 
     /* Write the modified bitmap to disk and read it back. */
-    assert(abmp_write_file(ABMP_TEST_OUTPUT_PATH, &bitmap) == ABMP_OK);
+    assert(abmp_write_filepath_using_memory(ABMP_TEST_OUTPUT_PATH, &bitmap) == ABMP_OK);
     abmp_free(&bitmap);
 
     /* Re-read the written file and verify the yellow pixel survived. */
-    status = abmp_read_file(ABMP_TEST_OUTPUT_PATH, &bitmap);
+    status = abmp_read_filepath_using_memory(ABMP_TEST_OUTPUT_PATH, &bitmap);
     assert(status == ABMP_OK);
     assert(bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2)] == 0);
     assert(bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 1] == 255);
@@ -382,7 +382,7 @@ static int test_file_api_read_write_brown_pixel(void)
 
     /* abmp_file_read_file opens the file by path and performs both
      * header and data reading in a single convenience call. */
-    status = abmp_file_read_file(ABMP_TEST_SAMPLE_PATH, &bitmap);
+    status = abmp_read_filepath_using_direct(ABMP_TEST_SAMPLE_PATH, &bitmap);
     assert(status == ABMP_OK);
 
     /* Pixel (2,2) is currently white: BGR(255,255,255). */
@@ -401,11 +401,11 @@ static int test_file_api_read_write_brown_pixel(void)
     assert(bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 2] == 165);
 
     /* Write using abmp_file_write_file (path-based convenience). */
-    assert(abmp_file_write_file(ABMP_TEST_OUTPUT_PATH, &bitmap) == ABMP_OK);
+    assert(abmp_write_filepath_using_direct(ABMP_TEST_OUTPUT_PATH, &bitmap) == ABMP_OK);
     abmp_free(&bitmap);
 
     /* Re-read and verify the brown pixel survived the round trip. */
-    status = abmp_read_file(ABMP_TEST_OUTPUT_PATH, &bitmap);
+    status = abmp_read_filepath_using_memory(ABMP_TEST_OUTPUT_PATH, &bitmap);
     assert(status == ABMP_OK);
     assert(bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2)] == 42);
     assert(bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 1] == 42);
@@ -454,10 +454,10 @@ static int test_create_5x5_bitmap_and_modify_red(void)
     assert(bitmap.pixel_data[abmp_get_pixel_position_from_top_left(&bitmap.header, 2, 2) + 2] == 255);
 
     /* Write the generated bitmap to disk and read it back. */
-    assert(abmp_file_write_file(ABMP_TEST_OUTPUT_PATH, &bitmap) == ABMP_OK);
+    assert(abmp_write_filepath_using_direct(ABMP_TEST_OUTPUT_PATH, &bitmap) == ABMP_OK);
     abmp_free(&bitmap);
 
-    status = abmp_read_file(ABMP_TEST_OUTPUT_PATH, &bitmap);
+    status = abmp_read_filepath_using_memory(ABMP_TEST_OUTPUT_PATH, &bitmap);
     assert(status == ABMP_OK);
     assert(bitmap.header.width == 5);
     assert(bitmap.header.height == 5);

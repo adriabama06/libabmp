@@ -16,7 +16,7 @@ size_t __BMP_MEMORY_OFFSETS(size_t count)
  * @param data Data len must be >= ABMP_HEADER_SIZE (54)
  * @return It returns ABMP_OK (0) if ok, any other number means other errors
  */
-ABMP_ERRORS abmp_read_header(uint8_t* data, ABMP_BITMAP_HEADER* header)
+ABMP_ERRORS abmp_read_header_from_memory(uint8_t* data, ABMP_BITMAP_HEADER* header)
 {
     if(sizeof(ABMP_BITMAP_HEADER) == ABMP_HEADER_SIZE) 
     {
@@ -61,7 +61,7 @@ ABMP_ERRORS abmp_read_header(uint8_t* data, ABMP_BITMAP_HEADER* header)
 /**
  * @param data Data len must be >= ABMP_HEADER_SIZE + header.dataoffset + header.imagesize
  */
-ABMP_ERRORS abmp_read_data(uint8_t* data, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_read_pixeldata_from_memory(uint8_t* data, ABMP_BITMAP* bitmap)
 {
     if(bitmap->header.compression != 0)
     {
@@ -86,7 +86,7 @@ ABMP_ERRORS abmp_read_data(uint8_t* data, ABMP_BITMAP* bitmap)
 }
 
 // TODO: Check fseek + After reading the header check if the remain file is long enough for the imagesize
-ABMP_ERRORS abmp_read_file_p(FILE* file, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_read_file_p_using_memory(FILE* file, ABMP_BITMAP* bitmap)
 {
     ABMP_ERRORS status;
 
@@ -115,7 +115,7 @@ ABMP_ERRORS abmp_read_file_p(FILE* file, ABMP_BITMAP* bitmap)
     }
 
     // Read header & pixel_data
-    status = abmp_read_header(file_data, &bitmap->header);
+    status = abmp_read_header_from_memory(file_data, &bitmap->header);
 
     if(status != ABMP_OK)
     {
@@ -123,28 +123,23 @@ ABMP_ERRORS abmp_read_file_p(FILE* file, ABMP_BITMAP* bitmap)
         return status;
     }
 
-    status = abmp_read_data(file_data, bitmap);
+    status = abmp_read_pixeldata_from_memory(file_data, bitmap);
 
     free(file_data);
 
     return status;
 }
 
-ABMP_ERRORS abmp_read_file(char* path, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_read_filepath_using_memory(char* path, ABMP_BITMAP* bitmap)
 {
     // Open file
     FILE* file = fopen(path, "rb");
 
     if(file == NULL) return ABMP_FILE_NOT_EXIST;
 
-    ABMP_ERRORS status = abmp_read_file_p(file, bitmap);
+    ABMP_ERRORS status = abmp_read_file_p_using_memory(file, bitmap);
 
     fclose(file);
 
     return status;
-}
-
-void abmp_free(ABMP_BITMAP* bitmap)
-{
-    free(bitmap->pixel_data);
 }
