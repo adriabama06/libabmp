@@ -2,6 +2,8 @@
 
 ABMP_ERRORS abmp_write_header_to_file(FILE* file, ABMP_BITMAP_HEADER* header)
 {
+    if(file == NULL || header == NULL) return ABMP_INVALID_PARAMETERS;
+
     if(header->signature[0] != 'B' || header->signature[1] != 'M')
     {
         // This is not a BMP file or it's corrupted. Let the user wipe by it self the header data.
@@ -47,6 +49,8 @@ ABMP_ERRORS abmp_write_header_to_file(FILE* file, ABMP_BITMAP_HEADER* header)
 
 ABMP_ERRORS abmp_write_pixeldata_to_file(FILE* file, ABMP_BITMAP* bitmap)
 {
+    if(file == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
+
     if(fwrite(bitmap->pixel_data, 1, bitmap->header.imagesize, file) != bitmap->header.imagesize) return ABMP_ERROR_WRITING_FILE;
 
     return ABMP_OK;
@@ -55,21 +59,47 @@ ABMP_ERRORS abmp_write_pixeldata_to_file(FILE* file, ABMP_BITMAP* bitmap)
 // TODO: This function is not taking in account the header->dataoffset, so is writing an invalid file if header->dataoffset is different from ABMP_HEADER_SIZE
 ABMP_ERRORS abmp_write_file_p_using_direct(FILE* file, ABMP_BITMAP* bitmap)
 {
+    if(file == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
+
     ABMP_ERRORS status;
+
+    long file_start = ftell(file);
+
+    if(file_start == -1) return ABMP_ERROR_FTELLING_FILE;
 
     status = abmp_write_header_to_file(file, &bitmap->header);
 
     if(status != ABMP_OK) return status;
 
-    // TODO: Here do the seek of dataoffset ^
+    // Unsafe, could leave to unexpected behaviour: fseek(file, file_start + bitmap->header.dataoffset)
+    // Doit by hand
+
+    long current_pos = ftell(file);
+
+    if(current_pos == -1) return ABMP_ERROR_FTELLING_FILE;
+
+    if(current_pos - file_start != ABMP_HEADER_SIZE) return ABMP_ERROR_WRITING_FILE;
+
+    // Manually fill zeros
+    if(current_pos - file_start > ABMP_HEADER_SIZE)
+    {
+        uint8_t zero = 0;
+        size_t padding = (current_pos - file_start) - ABMP_HEADER_SIZE;
+        for (size_t i = 0; i < padding; i++)
+        {
+            if(fwrite(&zero, 1, sizeof(uint8_t), file) != sizeof(uint8_t)) return ABMP_ERROR_WRITING_FILE;
+        }
+    }
 
     status = abmp_write_pixeldata_to_file(file, bitmap);
 
     return status;
 }
 
-ABMP_ERRORS abmp_write_filepath_using_direct(char* path, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_write_filepath_using_direct(const char* path, ABMP_BITMAP* bitmap)
 {
+    if(path == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
+
     // Open file
     FILE* file = fopen(path, "wb");
 

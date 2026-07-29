@@ -130,7 +130,7 @@ ABMP_ERRORS abmp_read_file_p_using_memory(FILE* file, ABMP_BITMAP* bitmap)
     return status;
 }
 
-ABMP_ERRORS abmp_read_filepath_using_memory(char* path, ABMP_BITMAP* bitmap)
+ABMP_ERRORS abmp_read_filepath_using_memory(const char* path, ABMP_BITMAP* bitmap)
 {
     // Open file
     FILE* file = fopen(path, "rb");

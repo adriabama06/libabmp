@@ -45,7 +45,10 @@ typedef enum ABMP_ERRORS_E {
     ABMP_FILE_NOT_EXIST,
     ABMP_ERROR_READING_FILE,
     ABMP_ERROR_WRITING_FILE,
-    ABMP_ERROR_OPENING_FILE
+    ABMP_ERROR_OPENING_FILE,
+    ABMP_INVALID_PARAMETERS,
+    ABMP_ERROR_SEEKING_FILE,
+    ABMP_ERROR_FTELLING_FILE
 } ABMP_ERRORS;
 
 /* WORKING ON MEMORY (memory -> memory | memory -> memory) */
@@ -53,27 +56,27 @@ typedef enum ABMP_ERRORS_E {
 ABMP_ERRORS abmp_read_header_from_memory(uint8_t* data, ABMP_BITMAP_HEADER* header);
 ABMP_ERRORS abmp_read_pixeldata_from_memory(uint8_t* data, ABMP_BITMAP* bitmap);
 ABMP_ERRORS abmp_read_file_p_using_memory(FILE* file, ABMP_BITMAP* bitmap);
-ABMP_ERRORS abmp_read_filepath_using_memory(char* path, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_read_filepath_using_memory(const char* path, ABMP_BITMAP* bitmap);
 
 // Write
 uint8_t* abmp_allocate_filedata(ABMP_BITMAP_HEADER* header);
 ABMP_ERRORS abmp_write_header_to_memory(uint8_t* data, ABMP_BITMAP_HEADER* header);
 ABMP_ERRORS abmp_write_pixeldata_to_memory(uint8_t* data, ABMP_BITMAP* bitmap);
 ABMP_ERRORS abmp_write_file_p_using_memory(FILE* file, ABMP_BITMAP* bitmap);
-ABMP_ERRORS abmp_write_filepath_using_memory(char* path, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_write_filepath_using_memory(const char* path, ABMP_BITMAP* bitmap);
 
 /* WORKING DIRECTLY FROM A FILE (file -> memory | memory -> file) */
 // Read
 ABMP_ERRORS abmp_read_header_from_file(FILE* file, ABMP_BITMAP_HEADER* header);
 ABMP_ERRORS abmp_read_pixeldata_from_file(FILE* file, ABMP_BITMAP* bitmap);
 ABMP_ERRORS abmp_read_file_p_using_direct(FILE* file, ABMP_BITMAP* bitmap);
-ABMP_ERRORS abmp_read_filepath_using_direct(char* path, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_read_filepath_using_direct(const char* path, ABMP_BITMAP* bitmap);
 
 // Write
 ABMP_ERRORS abmp_write_header_to_file(FILE* file, ABMP_BITMAP_HEADER* header);
 ABMP_ERRORS abmp_write_pixeldata_to_file(FILE* file, ABMP_BITMAP* bitmap);
 ABMP_ERRORS abmp_write_file_p_using_direct(FILE* file, ABMP_BITMAP* bitmap);
-ABMP_ERRORS abmp_write_filepath_using_direct(char* path, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_write_filepath_using_direct(const char* path, ABMP_BITMAP* bitmap);
 
 // TODO: Add tests for abmp_openfile & abmp_savefile
 
