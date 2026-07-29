@@ -389,6 +389,7 @@ void abmp_hello7(void)
     printf("abmp_hello7()\n");
 
     char output_path[] = "./mydraw.bmp";
+    char output_path2[] = "./mydraw2.bmp";
 
     ABMP_BITMAP bitmap;
 
@@ -401,16 +402,38 @@ void abmp_hello7(void)
             abmp_draw(
                 &bitmap,
                 i, j,
-                i % 256, j % 256, i+j % 256
+                i % 256, j % 256, (i+j) % 256
             );
         }
     }
 
-    status = abmp_write_filepath_using_direct(output_path, &bitmap);
+    status = abmp_savefile(output_path, &bitmap);
 
     printf("status = %d\n", status);
 
     printf("Generated file %s\n", output_path);
+
+    abmp_free(&bitmap);
+
+    status = abmp_create_bitmap(&bitmap, 1280, 720);
+
+    for (uint32_t i = 0; i < bitmap.header.width; i++)
+    {
+        for (uint32_t j = 0; j < bitmap.header.height * 2; j++) // Dont worry, draw uses module to never get out of the image
+        {
+            abmp_draw(
+                &bitmap,
+                i, j,
+                255 - (i % 256), 255 - (j % 256), 255 - ((i+j) % 256)
+            );
+        }
+    }
+
+    status = abmp_savefile(output_path2, &bitmap);
+
+    printf("status = %d\n", status);
+
+    printf("Generated file %s\n", output_path2);
 
     abmp_free(&bitmap);
 }

@@ -82,12 +82,31 @@ ABMP_ERRORS abmp_write_filepath_using_direct(const char* path, ABMP_BITMAP* bitm
 // TODO: Add tests for abmp_openfile & abmp_savefile
 
 /* User helpers */
-inline ABMP_ERRORS abmp_openfile(char* filepath, ABMP_BITMAP* bitmap) {
+static inline ABMP_ERRORS abmp_openfile(const char* filepath, ABMP_BITMAP* bitmap) {
     return abmp_read_filepath_using_direct(filepath, bitmap);
 }
 
-inline ABMP_ERRORS abmp_savefile(char* filepath, ABMP_BITMAP* bitmap) {
+static inline ABMP_ERRORS abmp_savefile(const char* filepath, ABMP_BITMAP* bitmap) {
     return abmp_write_filepath_using_direct(filepath, bitmap);
+}
+
+// Pass a uint8_t buffer; where it will contain a bmp file ready to store in a file
+static inline ABMP_ERRORS abmp_makebuffer(uint8_t* buffer, ABMP_BITMAP* bitmap) {
+    if(bitmap == NULL) return ABMP_INVALID_PARAMETERS;
+
+    ABMP_ERRORS status;
+
+    buffer = abmp_allocate_filedata(&bitmap->header);
+    
+    if(buffer) return ABMP_OUT_OF_MEMORY;
+
+    status = abmp_write_header_to_memory(buffer, &bitmap->header);
+
+    if(status != ABMP_OK) return status;
+
+    status = abmp_write_pixeldata_to_memory(buffer, bitmap);
+
+    return status;
 }
 
 /* Bitmap helpers */
