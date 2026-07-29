@@ -4,7 +4,7 @@
 uint8_t* abmp_allocate_filedata(const ABMP_BITMAP_HEADER* header)
 {
     if(header == NULL) return NULL;
-    return (uint8_t*) malloc(header->dataoffset + header->imagesize);
+    return (uint8_t*) calloc(header->dataoffset + header->imagesize, sizeof(uint8_t));
 }
 
 /**
@@ -15,17 +15,9 @@ ABMP_ERRORS abmp_write_header_to_memory(uint8_t* data, const ABMP_BITMAP_HEADER*
 {
     if(data == NULL || header == NULL) return ABMP_INVALID_PARAMETERS;
 
-    if(header->signature[0] != 'B' || header->signature[1] != 'M')
-    {
-        // This is not a BMP file or it's corrupted. Let the user wipe by it self the header data.
-        return ABMP_IS_NOT_BMP_FILE;
-    }
+    ABMP_ERRORS status;
 
-    if(header->width * header->height * 3 + (header->width % 4) * header->height != header->imagesize && header->imagesize != 0) // It is valid to set imagesize = 0 if compression = 0
-    {
-        // A: This is not a BMP file, B: The file is wrong.
-        return ABMP_BMP_DATA_IS_CORRUPTED;
-    }
+    if((status = abmp_check_header(header)) != ABMP_OK) return status;
 
     if(sizeof(ABMP_BITMAP_HEADER) == ABMP_HEADER_SIZE) 
     {
@@ -84,6 +76,8 @@ ABMP_ERRORS abmp_write_file_p_using_memory(FILE* file, const ABMP_BITMAP* bitmap
         free(file_data);
         return status;
     }
+
+    // No need to manually add the space betwen header and dataoffset because we call calloc and it already reserves the dataoffset that is the headersize + extra (if need), and also reserves the size for imagesize
 
     status = abmp_write_pixeldata_to_memory(file_data, bitmap);
 

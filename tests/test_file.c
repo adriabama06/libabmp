@@ -154,12 +154,58 @@ static int test_file_api_read_write_brown_pixel(void)
     return 0;
 }
 
+/* Write a bitmap with dataoffset > ABMP_HEADER_SIZE using the direct
+ * API and verify the zero-padding is written correctly.  The file
+ * should contain: header (54 bytes), zeros (dataoffset - 54 bytes),
+ * then pixel data. */
+static int test_file_direct_write_zero_padding(void)
+{
+    ABMP_BITMAP original = {0};
+    ABMP_BITMAP decoded = {0};
+
+    if (make_bitmap(&original) != 0)
+        return 1;
+
+    /* Set dataoffset to trigger the zero-padding loop. */
+    original.header.dataoffset = 128;
+
+    /* Write using the direct API. */
+    assert(abmp_write_filepath_using_direct(ABMP_TEST_OUTPUT_PATH, &original) == ABMP_OK);
+
+    /* Read back using the memory API (which correctly handles any dataoffset). */
+    assert(abmp_read_filepath_using_memory(ABMP_TEST_OUTPUT_PATH, &decoded) == ABMP_OK);
+
+    /* Pixel data must survive the round trip. */
+    assert(check_bitmap_equal(&original, &decoded) == 0);
+
+    /* Verify the zero-padding bytes between header and pixel data. */
+    {
+        FILE *f = fopen(ABMP_TEST_OUTPUT_PATH, "rb");
+        uint8_t buf[128];
+        assert(f != NULL);
+        assert(fread(buf, 1, sizeof(buf), f) == sizeof(buf));
+
+        /* Header occupies bytes 0..53, padding occupies bytes 54..127. */
+        for (size_t i = ABMP_HEADER_SIZE; i < 128; i++)
+        {
+            assert(buf[i] == 0);
+        }
+        fclose(f);
+    }
+
+    remove(ABMP_TEST_OUTPUT_PATH);
+    abmp_free(&decoded);
+    abmp_free(&original);
+    return 0;
+}
+
 int main(void)
 {
     assert(test_file_round_trips() == 0);
     assert(test_read_bitmap_from_file() == 0);
     assert(test_read_bitmap_from_file_stream() == 0);
     assert(test_file_api_read_write_brown_pixel() == 0);
+    assert(test_file_direct_write_zero_padding() == 0);
 
     puts("test_file passed.");
     return 0;

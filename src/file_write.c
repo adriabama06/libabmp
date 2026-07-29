@@ -4,17 +4,9 @@ ABMP_ERRORS abmp_write_header_to_file(FILE* file, const ABMP_BITMAP_HEADER* head
 {
     if(file == NULL || header == NULL) return ABMP_INVALID_PARAMETERS;
 
-    if(header->signature[0] != 'B' || header->signature[1] != 'M')
-    {
-        // This is not a BMP file or it's corrupted. Let the user wipe by it self the header data.
-        return ABMP_IS_NOT_BMP_FILE;
-    }
+    ABMP_ERRORS status;
 
-    if(header->width * header->height * 3 + (header->width % 4) * header->height != header->imagesize && header->imagesize != 0) // It is valid to set imagesize = 0 if compression = 0
-    {
-        // A: This is not a BMP file, B: The file is wrong.
-        return ABMP_BMP_DATA_IS_CORRUPTED;
-    }
+    if((status = abmp_check_header(header)) != ABMP_OK) return status;
 
     if(sizeof(ABMP_BITMAP_HEADER) == ABMP_HEADER_SIZE) 
     {
@@ -49,7 +41,7 @@ ABMP_ERRORS abmp_write_header_to_file(FILE* file, const ABMP_BITMAP_HEADER* head
 
 ABMP_ERRORS abmp_write_pixeldata_to_file(FILE* file, const ABMP_BITMAP* bitmap)
 {
-    if(file == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
+    if(file == NULL || bitmap == NULL || bitmap->pixel_data == NULL) return ABMP_INVALID_PARAMETERS;
 
     if(fwrite(bitmap->pixel_data, 1, bitmap->header.imagesize, file) != bitmap->header.imagesize) return ABMP_ERROR_WRITING_FILE;
 
@@ -83,11 +75,10 @@ ABMP_ERRORS abmp_write_file_p_using_direct(FILE* file, const ABMP_BITMAP* bitmap
     // Manually fill zeros
     if(bitmap->header.dataoffset > ABMP_HEADER_SIZE)
     {
-        uint8_t zero = 0;
         size_t padding = bitmap->header.dataoffset - ABMP_HEADER_SIZE;
         for (size_t i = 0; i < padding; i++)
         {
-            if(fwrite(&zero, 1, sizeof(uint8_t), file) != sizeof(uint8_t)) return ABMP_ERROR_WRITING_FILE;
+            if(fputc(0, file) == EOF) return ABMP_ERROR_WRITING_FILE;
         }
     }
 
