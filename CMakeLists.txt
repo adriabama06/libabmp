@@ -30,12 +30,22 @@ set(CMAKE_STATIC_LIBRARY_PREFIX "")
 # add_subdirectory(example)
 
 if(BUILD_TESTING)
-    add_executable(libabmp_tests
-        tests/test_abmp.c
+    set(TEST_SUITES
+        test_create
+        test_memory
+        test_file
+        test_errors
+        test_errors_leak
+        test_fuzz
     )
-    target_link_libraries(libabmp_tests PRIVATE libabmp)
-    target_compile_definitions(libabmp_tests PRIVATE
-        ABMP_TEST_OUTPUT_PATH="${CMAKE_CURRENT_BINARY_DIR}/libabmp_test_output.bmp"
-    )
-    add_test(NAME libabmp_tests COMMAND libabmp_tests)
+
+    foreach(test_suite ${TEST_SUITES})
+        add_executable(${test_suite} tests/${test_suite}.c)
+        target_link_libraries(${test_suite} PRIVATE libabmp)
+        target_compile_definitions(${test_suite} PRIVATE
+            ABMP_TEST_OUTPUT_PATH="${CMAKE_CURRENT_BINARY_DIR}/${test_suite}_output.bmp"
+            ABMP_TEST_SAMPLE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/samples/twoofpadding.bmp"
+        )
+        add_test(NAME ${test_suite} COMMAND ${test_suite})
+    endforeach()
 endif()
