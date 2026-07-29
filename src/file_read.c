@@ -72,11 +72,23 @@ ABMP_ERRORS abmp_read_pixeldata_from_file(FILE* file, ABMP_BITMAP* bitmap)
     if(bitmap->pixel_data == NULL) return ABMP_OUT_OF_MEMORY;
 
     // Can't get current position
-    if(ftell(file) == -1) return ABMP_ERROR_FTELLING_FILE;
+    if(ftell(file) == -1)
+    {
+        free(bitmap->pixel_data);
+        return ABMP_ERROR_FTELLING_FILE;
+    }
 
-    if(fseek(file, ftell(file) + bitmap->header.dataoffset, SEEK_SET) != 0) return ABMP_ERROR_SEEKING_FILE;
+    if(fseek(file, ftell(file) + bitmap->header.dataoffset, SEEK_SET) != 0)
+    {
+        free(bitmap->pixel_data);
+        return ABMP_ERROR_SEEKING_FILE;
+    }
 
-    if(fread(bitmap->pixel_data, 1, bitmap->header.imagesize, file) != bitmap->header.imagesize) return ABMP_ERROR_READING_FILE;
+    if(fread(bitmap->pixel_data, 1, bitmap->header.imagesize, file) != bitmap->header.imagesize)
+    {
+        free(bitmap->pixel_data);
+        return ABMP_ERROR_READING_FILE;
+    }
 
     return ABMP_OK;
 }

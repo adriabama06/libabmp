@@ -41,6 +41,11 @@ static inline uint32_t abmp_get_pixel_raw_position(ABMP_BITMAP_HEADER* header, u
         |oooooo|
     */
 
+    if(header == NULL) return 0;
+
+    if(x >= header->width) x %= header->width;
+    if(y >= header->width) y %= header->width;
+
     // move down y times rows
     // + padding*y to skip y times the padding
     // + x in the current line
@@ -96,6 +101,11 @@ static inline uint32_t abmp_get_pixel_position_from_top_left(ABMP_BITMAP_HEADER*
         |oooooo|
         |oooXoo|
     */
+
+    if(header == NULL) return 0;
+
+    if(x >= header->width) x %= header->width;
+    if(y >= header->width) y %= header->width;
 
     // Note: (header.height - y - 1); header.height=4,y=0 --> -1 because header.height=4 and you start conting from zero, making height=3 as height max height
     // this is only to reverse the count of the rows
