@@ -6,6 +6,11 @@ include(CTest)
 # Set ABMP_ABITMAP_NOT_USE_PACKED_HEADER to 0 by default
 add_compile_definitions(ABMP_ABITMAP_NOT_USE_PACKED_HEADER=0)
 
+# Strict compilation flags
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+endif()
+
 # Library target
 add_library(libabmp STATIC
     src/abmp.c

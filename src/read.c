@@ -31,22 +31,29 @@ ABMP_ERRORS abmp_read_header_from_memory(const uint8_t* data, ABMP_BITMAP_HEADER
     else // This means __attribute__((__packed__)) is not working, leaving to a manual read
     {
         size_t count = 0;
+        size_t offset = 0;
 
-        memcpy(&header->signature,        data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->filesize,         data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->reserved,         data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->dataoffset,       data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->size,             data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->width,            data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->height,           data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->planes,           data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->bits_per_pixel,   data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->compression,      data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->imagesize,        data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->y_pixels_per_m,   data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->x_pixels_per_m,   data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->colors_used,      data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
-        memcpy(&header->important_colors, data + _BMP_MEMORY_OFFSETS(count), __BMP_MEMORY_SIZES[count++]);
+#define ABMP_COPY_FIELD(field, size)                 \
+        memcpy(&header->field, data + offset, size); \
+        offset += size;
+
+        ABMP_COPY_FIELD(signature,        __BMP_MEMORY_SIZES[count++]);
+        ABMP_COPY_FIELD(filesize,         __BMP_MEMORY_SIZES[count++]);
+        ABMP_COPY_FIELD(reserved,         __BMP_MEMORY_SIZES[count++]);
+        ABMP_COPY_FIELD(dataoffset,       __BMP_MEMORY_SIZES[count++]);
+        ABMP_COPY_FIELD(size,             __BMP_MEMORY_SIZES[count++]);
+        ABMP_COPY_FIELD(width,            __BMP_MEMORY_SIZES[count++]);
+        ABMP_COPY_FIELD(height,           __BMP_MEMORY_SIZES[count++]);
+        ABMP_COPY_FIELD(planes,           __BMP_MEMORY_SIZES[count++]);
+        ABMP_COPY_FIELD(bits_per_pixel,   __BMP_MEMORY_SIZES[count++]);
+        ABMP_COPY_FIELD(compression,      __BMP_MEMORY_SIZES[count++]);
+        ABMP_COPY_FIELD(imagesize,        __BMP_MEMORY_SIZES[count++]);
+        ABMP_COPY_FIELD(y_pixels_per_m,   __BMP_MEMORY_SIZES[count++]);
+        ABMP_COPY_FIELD(x_pixels_per_m,   __BMP_MEMORY_SIZES[count++]);
+        ABMP_COPY_FIELD(colors_used,      __BMP_MEMORY_SIZES[count++]);
+        ABMP_COPY_FIELD(important_colors, __BMP_MEMORY_SIZES[count]);
+
+#undef ABMP_COPY_FIELD
     }
 
     ABMP_ERRORS status;
@@ -119,7 +126,7 @@ ABMP_ERRORS abmp_read_file_p_using_memory(FILE* file, ABMP_BITMAP* bitmap)
 
     size_t f_status = fread(file_data, sizeof(uint8_t), file_size, file);
 
-    if(f_status != file_size)
+    if(f_status != (size_t) file_size)
     {
         free(file_data);
         return ABMP_ERROR_READING_FILE;

@@ -19,21 +19,27 @@ ABMP_ERRORS abmp_write_header_to_file(FILE* file, const ABMP_BITMAP_HEADER* head
 
         // fwrite automatically moves the position -> no need of use fseek
 
-        if(fwrite(&header->signature,        1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_WRITING_FILE;
-        if(fwrite(&header->filesize,         1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_WRITING_FILE;
-        if(fwrite(&header->reserved,         1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_WRITING_FILE;
-        if(fwrite(&header->dataoffset,       1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_WRITING_FILE;
-        if(fwrite(&header->size,             1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_WRITING_FILE;
-        if(fwrite(&header->width,            1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_WRITING_FILE;
-        if(fwrite(&header->height,           1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_WRITING_FILE;
-        if(fwrite(&header->planes,           1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_WRITING_FILE;
-        if(fwrite(&header->bits_per_pixel,   1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_WRITING_FILE;
-        if(fwrite(&header->compression,      1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_WRITING_FILE;
-        if(fwrite(&header->imagesize,        1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_WRITING_FILE;
-        if(fwrite(&header->y_pixels_per_m,   1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_WRITING_FILE;
-        if(fwrite(&header->x_pixels_per_m,   1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_WRITING_FILE;
-        if(fwrite(&header->colors_used,      1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_WRITING_FILE;
-        if(fwrite(&header->important_colors, 1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_WRITING_FILE;
+#define ABMP_WRITE_FIELD(field) \
+            if(fwrite(&header->field, 1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count]) return ABMP_ERROR_WRITING_FILE; \
+            count++;
+
+        ABMP_WRITE_FIELD(signature)
+        ABMP_WRITE_FIELD(filesize)
+        ABMP_WRITE_FIELD(reserved)
+        ABMP_WRITE_FIELD(dataoffset)
+        ABMP_WRITE_FIELD(size)
+        ABMP_WRITE_FIELD(width)
+        ABMP_WRITE_FIELD(height)
+        ABMP_WRITE_FIELD(planes)
+        ABMP_WRITE_FIELD(bits_per_pixel)
+        ABMP_WRITE_FIELD(compression)
+        ABMP_WRITE_FIELD(imagesize)
+        ABMP_WRITE_FIELD(y_pixels_per_m)
+        ABMP_WRITE_FIELD(x_pixels_per_m)
+        ABMP_WRITE_FIELD(colors_used)
+        ABMP_WRITE_FIELD(important_colors)
+
+#undef ABMP_WRITE_FIELD
     }
 
     return ABMP_OK;

@@ -15,21 +15,27 @@ ABMP_ERRORS abmp_read_header_from_file(FILE* file, ABMP_BITMAP_HEADER* header)
 
         // fread automatically moves the position -> no need of use fseek
 
-        if(fread(&header->signature,        1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_READING_FILE;
-        if(fread(&header->filesize,         1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_READING_FILE;
-        if(fread(&header->reserved,         1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_READING_FILE;
-        if(fread(&header->dataoffset,       1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_READING_FILE;
-        if(fread(&header->size,             1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_READING_FILE;
-        if(fread(&header->width,            1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_READING_FILE;
-        if(fread(&header->height,           1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_READING_FILE;
-        if(fread(&header->planes,           1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_READING_FILE;
-        if(fread(&header->bits_per_pixel,   1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_READING_FILE;
-        if(fread(&header->compression,      1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_READING_FILE;
-        if(fread(&header->imagesize,        1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_READING_FILE;
-        if(fread(&header->y_pixels_per_m,   1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_READING_FILE;
-        if(fread(&header->x_pixels_per_m,   1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_READING_FILE;
-        if(fread(&header->colors_used,      1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_READING_FILE;
-        if(fread(&header->important_colors, 1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count++]) return ABMP_ERROR_READING_FILE;
+#define ABMP_READ_FIELD(field) \
+            if(fread(&header->field, 1, __BMP_MEMORY_SIZES[count], file) != __BMP_MEMORY_SIZES[count]) return ABMP_ERROR_READING_FILE; \
+            count++;
+
+        ABMP_READ_FIELD(signature)
+        ABMP_READ_FIELD(filesize)
+        ABMP_READ_FIELD(reserved)
+        ABMP_READ_FIELD(dataoffset)
+        ABMP_READ_FIELD(size)
+        ABMP_READ_FIELD(width)
+        ABMP_READ_FIELD(height)
+        ABMP_READ_FIELD(planes)
+        ABMP_READ_FIELD(bits_per_pixel)
+        ABMP_READ_FIELD(compression)
+        ABMP_READ_FIELD(imagesize)
+        ABMP_READ_FIELD(y_pixels_per_m)
+        ABMP_READ_FIELD(x_pixels_per_m)
+        ABMP_READ_FIELD(colors_used)
+        ABMP_READ_FIELD(important_colors)
+
+#undef ABMP_READ_FIELD
     }
 
     ABMP_ERRORS status;
