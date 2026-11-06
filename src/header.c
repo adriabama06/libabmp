@@ -16,3 +16,20 @@ ABMP_ERRORS abmp_check_header(const ABMP_BITMAP_HEADER* header)
 
     return ABMP_OK;
 }
+
+ABMP_ERRORS abmp_header_compatibility_check(const ABMP_BITMAP_HEADER* header)
+{
+    if(header->compression != 0)
+    {
+        // Has compression
+        return ABMP_COMPRESSION_IS_NOT_SUPPORTED;
+    }
+
+    if(header->bits_per_pixel <= 8)
+    {
+        // Do something with ColorTable
+        return ABMP_LOW_BITS_PER_PIXEL_IS_NOT_SUPPORTED;
+    }
+
+    return ABMP_OK;
+}

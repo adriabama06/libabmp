@@ -127,6 +127,7 @@ void abmp_print_header(const ABMP_BITMAP_HEADER* header);
 ABMP_ERRORS abmp_create_bitmap(ABMP_BITMAP* bitmap, uint32_t width, uint32_t height);
 void abmp_free(ABMP_BITMAP* bitmap);
 ABMP_ERRORS abmp_check_header(const ABMP_BITMAP_HEADER* header);
+ABMP_ERRORS abmp_header_compatibility_check(const ABMP_BITMAP_HEADER* header);
 
 #ifdef __cplusplus
 }

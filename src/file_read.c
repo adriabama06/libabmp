@@ -52,17 +52,7 @@ ABMP_ERRORS abmp_read_pixeldata_from_file(FILE* file, ABMP_BITMAP* bitmap)
 {
     if(file == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
 
-    if(bitmap->header.compression != 0)
-    {
-        // Has compression
-        return ABMP_COMPRESSION_IS_NOT_SUPPORTED;
-    }
-
-    if(bitmap->header.bits_per_pixel <= 8)
-    {
-        // Do something with ColorTable
-        return ABMP_LOW_BITS_PER_PIXEL_IS_NOT_SUPPORTED;
-    }
+    if(abmp_header_compatibility_check(&bitmap->header) != ABMP_OK) return abmp_header_compatibility_check(&bitmap->header);
 
     bitmap->pixel_data = (uint8_t*) malloc(bitmap->header.imagesize);
 
