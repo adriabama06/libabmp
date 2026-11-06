@@ -1,5 +1,10 @@
 #include "abmp.h"
 
+#ifndef _WIN32
+#include <fcntl.h>  // abmp_hello8 mmap example
+#include <unistd.h> // close()
+#endif
+
 void abmp_hello(void) {
     printf("abmp_hello()\n");
 
@@ -438,6 +443,80 @@ void abmp_hello7(void)
     abmp_free(&bitmap);
 }
 
+#ifndef _WIN32
+void abmp_hello8(void)
+{
+    ABMP_ERRORS status;
+
+    printf("abmp_hello8()\n");
+
+    char input_path[] = "../samples/twoofpadding.bmp";
+    char output_path[] = "./mmap_edit.bmp";
+
+    // The editable mmap writes through the mapping into the opened file,
+    // so edit a copy, never the fixture sample.
+    ABMP_BITMAP original;
+
+    status = abmp_read_filepath_using_memory(input_path, &original);
+    printf("Reading %s status: %d\n", input_path, status);
+
+    status = abmp_write_filepath_using_direct(output_path, &original);
+    printf("Copying to %s status: %d\n", output_path, status);
+
+    abmp_free(&original);
+
+    // MAP_SHARED requires the fd opened for writing (a fd opened only
+    // for reading works for MAP_PRIVATE views, but not for MAP_SHARED).
+    int fd = open(output_path, O_RDWR);
+
+    if (fd < 0) {
+        printf("Cannot open %s with write access\n", output_path);
+        return;
+    }
+
+    ABMP_BITMAP view;
+
+    status = abmp_mmap_editablefile_fd(fd, &view);
+    printf("status = %d\n", status);
+
+    // The mapping survives closing the fd.
+    close(fd);
+
+    printf("2, 2 : (%d,%d,%d)\n",
+        view.pixel_data[abmp_get_pixel_position_from_top_left(&view.header, 2, 2) + 2],
+        view.pixel_data[abmp_get_pixel_position_from_top_left(&view.header, 2, 2) + 1],
+        view.pixel_data[abmp_get_pixel_position_from_top_left(&view.header, 2, 2)]);
+
+    // BGR -- RGB(0,255,0) is Green -- BGR(0,255,0) is Green
+    abmp_draw(&view, 2, 2, 0, 255, 0);
+
+    printf("2, 2 : (%d,%d,%d)\n",
+        view.pixel_data[abmp_get_pixel_position_from_top_left(&view.header, 2, 2) + 2],
+        view.pixel_data[abmp_get_pixel_position_from_top_left(&view.header, 2, 2) + 1],
+        view.pixel_data[abmp_get_pixel_position_from_top_left(&view.header, 2, 2)]);
+
+    // Closing the view unmaps it: the green pixel is now inside the file.
+    status = abmp_mmap_close(&view);
+    printf("status = %d\n", status);
+
+    // Verify the edit was really persisted by reading the file normally.
+    ABMP_BITMAP recheck;
+
+    status = abmp_read_filepath_using_memory(output_path, &recheck);
+
+    printf("Re-reading %s status: %d\n", output_path, status);
+
+    printf("2, 2 : (%d,%d,%d)\n",
+        recheck.pixel_data[abmp_get_pixel_position_from_top_left(&recheck.header, 2, 2) + 2],
+        recheck.pixel_data[abmp_get_pixel_position_from_top_left(&recheck.header, 2, 2) + 1],
+        recheck.pixel_data[abmp_get_pixel_position_from_top_left(&recheck.header, 2, 2)]);
+
+    printf("Done mmap-editing %s in (2, 2)\n", output_path);
+
+    abmp_free(&recheck);
+}
+#endif
+
 int main() {
     abmp_hello();
     abmp_hello2();
@@ -448,5 +527,9 @@ int main() {
 
     abmp_hello6();
     abmp_hello7();
+
+#ifndef _WIN32
+    abmp_hello8(); // POSIX-only (mmap)
+#endif
     return 0;
 }

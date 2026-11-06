@@ -12,7 +12,7 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 # Library target
-add_library(libabmp STATIC
+set(LIB_SOURCES
     src/abmp.c
 
     src/header.c
@@ -25,8 +25,14 @@ add_library(libabmp STATIC
 
     src/create.c
     src/cast.c
-    src/mmap.c
 )
+
+# mmap is POSIX-only (guarded with #ifndef _WIN32 in abmp.h)
+if(NOT WIN32)
+    list(APPEND LIB_SOURCES src/mmap.c)
+endif()
+
+add_library(libabmp STATIC ${LIB_SOURCES})
 
 target_include_directories(libabmp PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -43,6 +49,7 @@ if(BUILD_TESTING)
         test_create
         test_memory
         test_file
+        test_mmap
         test_errors
         test_errors_leak
         test_fuzz

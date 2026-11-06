@@ -7,6 +7,16 @@
 
 ABMP_ERRORS abmp_mmap_openfile_fd(int fd, ABMP_BITMAP* bitmap)
 {
+    return abmp_mmap_openfile_fd_flags(fd, MAP_PRIVATE, bitmap);
+}
+
+ABMP_ERRORS abmp_mmap_editablefile_fd(int fd, ABMP_BITMAP* bitmap)
+{
+    return abmp_mmap_openfile_fd_flags(fd, MAP_SHARED, bitmap);
+}
+
+ABMP_ERRORS abmp_mmap_openfile_fd_flags(int fd, int flags, ABMP_BITMAP* bitmap)
+{
     struct stat st;
 
     if(fstat(fd, &st) < 0) return ABMP_ERROR_OPENING_FILE;
@@ -15,8 +25,9 @@ ABMP_ERRORS abmp_mmap_openfile_fd(int fd, ABMP_BITMAP* bitmap)
 
     if(len < ABMP_HEADER_SIZE) return ABMP_FILE_SIZE_IS_LOWER_THAN_HEADER_SIZE;
 
-    // MAP_PRIVATE: writable copy-on-write view, writes never reach the file
-    uint8_t* data = (uint8_t*) mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+    // flags: MAP_PRIVATE (writable copy-on-write, writes never reach the file)
+    //        or MAP_SHARED (writes go to the file, requires an O_RDWR fd)
+    uint8_t* data = (uint8_t*) mmap(NULL, len, PROT_READ | PROT_WRITE, flags, fd, 0);
 
     if(data == MAP_FAILED) return ABMP_OUT_OF_MEMORY;
 

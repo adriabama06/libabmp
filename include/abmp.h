@@ -89,6 +89,9 @@ ABMP_ERRORS abmp_cast_from_memory(uint8_t* data, ABMP_BITMAP* bitmap);
 // Mmap, posix only
 
 ABMP_ERRORS abmp_mmap_openfile_fd(int fd, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_mmap_editablefile_fd(int fd, ABMP_BITMAP* bitmap);
+ABMP_ERRORS abmp_mmap_openfile_fd_flags(int fd, int flags, ABMP_BITMAP* bitmap);
+
 static inline ABMP_ERRORS abmp_mmap_close(ABMP_BITMAP* bitmap)
 {
     if(munmap(bitmap->pixel_data - bitmap->header.dataoffset, bitmap->header.dataoffset + bitmap->header.imagesize) < 0) return ABMP_ERROR_MUNMAP;
