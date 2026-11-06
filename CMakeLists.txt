@@ -24,6 +24,8 @@ add_library(libabmp STATIC
     src/file_write.c
 
     src/create.c
+    src/cast.c
+    src/mmap.c
 )
 
 target_include_directories(libabmp PUBLIC

@@ -14,6 +14,12 @@ ABMP_ERRORS abmp_check_header(const ABMP_BITMAP_HEADER* header)
         return ABMP_BMP_DATA_IS_CORRUPTED;
     }
 
+    if(header->dataoffset < ABMP_HEADER_SIZE)
+    {
+        // WHAT? Dataoffset is wrong
+        return ABMP_INVALID_DATAOFFSET;
+    }
+
     return ABMP_OK;
 }
 

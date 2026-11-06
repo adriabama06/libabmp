@@ -49,7 +49,9 @@ typedef enum ABMP_ERRORS_E {
     ABMP_INVALID_PARAMETERS,
     ABMP_ERROR_SEEKING_FILE,
     ABMP_ERROR_FTELLING_FILE,
-    ABMP_FILE_IMAGESIZE_MISSMATCH
+    ABMP_FILE_IMAGESIZE_MISSMATCH,
+    ABMP_INVALID_DATAOFFSET,
+    ABMP_ERROR_MUNMAP
 } ABMP_ERRORS;
 
 /* WORKING ON MEMORY (memory -> memory | memory -> memory) */
@@ -78,6 +80,25 @@ ABMP_ERRORS abmp_write_header_to_file(FILE* file, const ABMP_BITMAP_HEADER* head
 ABMP_ERRORS abmp_write_pixeldata_to_file(FILE* file, const ABMP_BITMAP* bitmap);
 ABMP_ERRORS abmp_write_file_p_using_direct(FILE* file, const ABMP_BITMAP* bitmap);
 ABMP_ERRORS abmp_write_filepath_using_direct(const char* path, const ABMP_BITMAP* bitmap);
+
+ABMP_ERRORS abmp_cast_from_memory(uint8_t* data, ABMP_BITMAP* bitmap);
+
+#ifndef _WIN32
+#include <sys/mman.h>
+
+// Mmap, posix only
+
+ABMP_ERRORS abmp_mmap_openfile_fd(int fd, ABMP_BITMAP* bitmap);
+static inline ABMP_ERRORS abmp_mmap_close(ABMP_BITMAP* bitmap)
+{
+    if(munmap(bitmap->pixel_data - bitmap->header.dataoffset, bitmap->header.dataoffset + bitmap->header.imagesize) < 0) return ABMP_ERROR_MUNMAP;
+    memset(&bitmap->header, 0, sizeof(ABMP_BITMAP_HEADER));
+    bitmap->pixel_data = NULL;
+
+    return ABMP_OK;
+}
+
+#endif
 
 // TODO: Add tests for abmp_openfile & abmp_savefile
 
