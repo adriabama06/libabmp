@@ -307,6 +307,66 @@ static int test_mmap_editablefile_persists(void)
     return 0;
 }
 
+/* Path-based wrappers: abmp_mmap_openfile opens the file O_RDONLY and
+ * maps it MAP_PRIVATE; abmp_mmap_editablefile opens it O_RDWR and maps
+ * it MAP_SHARED. Both close the fd themselves, so this also proves no
+ * fd is leaked in any exit path. */
+static int test_mmap_path_helpers(void)
+{
+    ABMP_BITMAP view = {0};
+    ABMP_BITMAP decoded = {0};
+    ABMP_BITMAP recheck = {0};
+    FILE *src;
+    FILE *dst;
+    uint8_t *raw;
+    long size;
+
+    /* Read flavor: the fixture sample never needs write access. */
+    assert(abmp_mmap_openfile(ABMP_TEST_SAMPLE_PATH, &view) == ABMP_OK);
+    assert(abmp_read_filepath_using_memory(ABMP_TEST_SAMPLE_PATH, &decoded) == ABMP_OK);
+    assert(check_bitmap_equal(&decoded, &view) == 0);
+    assert(abmp_mmap_close(&view) == ABMP_OK);
+    abmp_free(&decoded);
+
+    /* Editable flavor: work on a copy of the sample. */
+    src = fopen(ABMP_TEST_SAMPLE_PATH, "rb");
+    assert(src != NULL);
+    assert(fseek(src, 0, SEEK_END) == 0);
+    size = ftell(src);
+    rewind(src);
+    raw = malloc((size_t) size);
+    assert(raw != NULL);
+    assert(fread(raw, 1, (size_t) size, src) == (size_t) size);
+    fclose(src);
+
+    dst = fopen(ABMP_TEST_OUTPUT_PATH, "wb");
+    assert(dst != NULL);
+    assert(fwrite(raw, 1, (size_t) size, dst) == (size_t) size);
+    fclose(dst);
+    free(raw);
+
+    /* A missing file must fail without touching the bitmap. */
+    assert(abmp_mmap_openfile("../no_such_file.bmp", &view) == ABMP_ERROR_OPENING_FILE);
+
+    assert(abmp_mmap_editablefile(ABMP_TEST_OUTPUT_PATH, &view) == ABMP_OK);
+
+    /* Paint pixel (0, 0): RGB(9, 8, 7) -> BGR(7, 8, 9). */
+    assert(view.pixel_data[0] == 255);
+    abmp_draw(&view, 0, 0, 9, 8, 7);
+
+    assert(abmp_mmap_close(&view) == ABMP_OK);
+
+    /* The edit must have reached the file. */
+    assert(abmp_read_filepath_using_memory(ABMP_TEST_OUTPUT_PATH, &recheck) == ABMP_OK);
+    assert(recheck.pixel_data[abmp_get_pixel_position_from_top_left(&recheck.header, 0, 0)] == 7);
+    assert(recheck.pixel_data[abmp_get_pixel_position_from_top_left(&recheck.header, 0, 0) + 1] == 8);
+    assert(recheck.pixel_data[abmp_get_pixel_position_from_top_left(&recheck.header, 0, 0) + 2] == 9);
+    abmp_free(&recheck);
+
+    remove(ABMP_TEST_OUTPUT_PATH);
+    return 0;
+}
+
 int main(void)
 {
 #if defined(_SC_MAPPED_FILES)
@@ -322,6 +382,7 @@ int main(void)
     assert(test_mmap_view_is_editable_and_private() == 0);
     assert(test_mmap_flags_variant() == 0);
     assert(test_mmap_editablefile_persists() == 0);
+    assert(test_mmap_path_helpers() == 0);
     assert(test_mmap_close_clears_bitmap() == 0);
     assert(test_mmap_cast_from_memory() == 0);
     assert(test_mmap_errors() == 0);

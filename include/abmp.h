@@ -85,6 +85,8 @@ ABMP_ERRORS abmp_cast_from_memory(uint8_t* data, ABMP_BITMAP* bitmap);
 
 #ifndef _WIN32
 #include <sys/mman.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 // Mmap, posix only
 
@@ -94,11 +96,43 @@ ABMP_ERRORS abmp_mmap_openfile_fd_flags(int fd, int flags, ABMP_BITMAP* bitmap);
 
 static inline ABMP_ERRORS abmp_mmap_close(ABMP_BITMAP* bitmap)
 {
+    if(bitmap == NULL) return ABMP_INVALID_PARAMETERS;
+
     if(munmap(bitmap->pixel_data - bitmap->header.dataoffset, bitmap->header.dataoffset + bitmap->header.imagesize) < 0) return ABMP_ERROR_MUNMAP;
     memset(&bitmap->header, 0, sizeof(ABMP_BITMAP_HEADER));
     bitmap->pixel_data = NULL;
 
     return ABMP_OK;
+}
+
+static inline ABMP_ERRORS abmp_mmap_openfile(const char* filepath, ABMP_BITMAP* bitmap)
+{
+    if(filepath == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
+
+    int fd = open(filepath, O_RDONLY);
+
+    if (fd < 0) return ABMP_ERROR_OPENING_FILE;
+
+    ABMP_ERRORS status = abmp_mmap_openfile_fd(fd, bitmap);
+
+    close(fd);
+
+    return status;
+}
+
+static inline ABMP_ERRORS abmp_mmap_editablefile(const char* filepath, ABMP_BITMAP* bitmap)
+{
+    if(filepath == NULL || bitmap == NULL) return ABMP_INVALID_PARAMETERS;
+
+    int fd = open(filepath, O_RDWR);
+
+    if (fd < 0) return ABMP_ERROR_OPENING_FILE;
+
+    ABMP_ERRORS status = abmp_mmap_editablefile_fd(fd, bitmap);
+
+    close(fd);
+
+    return status;
 }
 
 #endif

@@ -17,6 +17,8 @@ ABMP_ERRORS abmp_mmap_editablefile_fd(int fd, ABMP_BITMAP* bitmap)
 
 ABMP_ERRORS abmp_mmap_openfile_fd_flags(int fd, int flags, ABMP_BITMAP* bitmap)
 {
+    if(bitmap == NULL) return ABMP_INVALID_PARAMETERS;
+
     struct stat st;
 
     if(fstat(fd, &st) < 0) return ABMP_ERROR_OPENING_FILE;

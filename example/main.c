@@ -1,10 +1,5 @@
 #include "abmp.h"
 
-#ifndef _WIN32
-#include <fcntl.h>  // abmp_hello8 mmap example
-#include <unistd.h> // close()
-#endif
-
 void abmp_hello(void) {
     printf("abmp_hello()\n");
 
@@ -465,22 +460,12 @@ void abmp_hello8(void)
 
     abmp_free(&original);
 
-    // MAP_SHARED requires the fd opened for writing (a fd opened only
-    // for reading works for MAP_PRIVATE views, but not for MAP_SHARED).
-    int fd = open(output_path, O_RDWR);
-
-    if (fd < 0) {
-        printf("Cannot open %s with write access\n", output_path);
-        return;
-    }
-
     ABMP_BITMAP view;
 
-    status = abmp_mmap_editablefile_fd(fd, &view);
+    // abmp_mmap_editablefile opens the file O_RDWR, maps it MAP_SHARED
+    // and closes the fd in a single call.
+    status = abmp_mmap_editablefile(output_path, &view);
     printf("status = %d\n", status);
-
-    // The mapping survives closing the fd.
-    close(fd);
 
     printf("2, 2 : (%d,%d,%d)\n",
         view.pixel_data[abmp_get_pixel_position_from_top_left(&view.header, 2, 2) + 2],
